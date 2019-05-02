@@ -1,18 +1,21 @@
--- ECLAT (Experimental Compiler Library And Tools)
--- Copyright (C) 2019 Nicholas James Roberts (Reigate, UK)
-
--- This program is free software: you can redistribute it and/or modify
--- it under the terms of the GNU General Public License as published by
--- the Free Software Foundation, either version 3 of the License, or
--- (at your option) any later version.
-
--- This program is distributed in the hope that it will be useful,
--- but WITHOUT ANY WARRANTY; without even the implied warranty of
--- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
--- GNU General Public License for more details.
-
--- You should have received a copy of the GNU General Public License
--- along with this program.  If not, see <http://www.gnu.org/licenses/>.
+-----------------------------------------------------------------------------------------------
+-- 
+-- Copyright (C) 2019 The AdaOS Project
+-- 
+-- This file is part of ECLAT.
+-- 
+-- ECLAT is free software: you can redistribute it and/or modify it under the terms of the GNU 
+-- General Public License as published by the Free Software Foundation, either version 3 of 
+-- the License, or (at your option) any later version. 
+-- 
+-- ECLAT is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without 
+-- even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the 
+-- GNU General Public License for more details. 
+-- 
+-- You should have received a copy of the GNU General Public License along with ECLAT.  If 
+-- not, see <http://www.gnu.org/licenses/>. 
+-- 
+-----------------------------------------------------------------------------------------------
 
 --/ Lexical Analysis (implementation)
 
@@ -145,87 +148,120 @@ is
    
    --| ...
 
-   procedure Parse (...)
+   procedure Open (Parser: in out Lexical_Parser;
+                   File:   in out Ada.Text_IO.File_Type)
+   is
+   begin
+      ...
+   end;
+                   
+   procedure Close (Parser: in out Lexical_Parser)
+   is
+   begin
+      ...
+   end;
    
-   
-   
-   
+   function File_Lexical_Parser (Source: in Source_Descriptor) return Lexical_Parser
+   is
+   begin
+      Location.Source := new Source_Reference'(Source);
+   end;
+
+   function Input (Parser: in out Lexical_Parser) return Lexical_Element'Class
    is
    
+      procedure Fetch (Count: in Buffer_Count := 1)
+      is
+         N: Buffer_Count renames Parser.Filled;
+      begin
+         if N + Count > Buffer_Limit then raise Program_Error; end if;
+         for i in 1..Count loop
+            N := N + 1;
+            if Ada.Text_IO.End_Of_File(Parser.File) then
+               Parser.Buffer(N) := Latin_1.Nul;
+               Parser.At_End_Of_Line := True;
+               
+            Ada.Text_IO.Get (Parser.File, Parser.Buffer(N));
+         end loop;
+      end;
+      
+      procedure Discard (Count: in Buffer_Count := 1)
+      is
+         N: Buffer_Count renames Parser.Filled;
+      begin
+         if N < Count then raise Program_Error; end if;
+         N := N - Count;
+         Parser.Buffer(1..N-Count) := Parser.Buffer(Count+1..N)
+      end;
+   
+      function Current return Character 
+      is
+      begin
+         if Parser.Filled < 1 then Fetch; end if;
+         return Parser.Buffer(1);
+      end;
+      
+      subtype Lookahead_Range is Buffer_Index range 1 .. Buffer_Index'Last - 1;
+   
+      function Lookahead (N: Lookahead_Range := 1) return Character 
+      is
+      begin
+         if Parser.Filled < N+1 then Fetch; end if;
+         return Parser.Buffer(N+1);
+      end;
+      
+      -- function At_End_Of_Line return Boolean
+         -- is ( Current = Latin_1.LF 
+         
+      procedure Discard_End_Of_Line
+      is
+      begin
+         if Current = Latin_1.LF and Lookahead = 
+      
+   begin
+      
    
    
-   
-         case Char is
+         case Current 
+         is
             when '&' | '''' | '(' | ')' | '*' |
                  '+' | '-' | '.' | '/' | ':',
                  ';' | '<' | '=' | '>' '|' => 
-               Advance (1, new Delimiter_Element'(Char));
+               Discard;
+               return new Lexical_Element'( Delimiter, Ada_Delimiter(Current) );
                
-            
-'&', '''', '(', ')', '*',
-                               '+', '-', '.', '/', ':',
-                               ';', '<', '=', '>' '|',
-            
-            
+            when '-' => 
+               case Lookahead is 
+                  when '-' => 
+                     Discard(2); 
+                     while not Parser.End_Of_File and not End_Of_Line loop
+                        Discard;
+                     end loop;
+                     Discard_End_Of_Line;
+                     return 
+                        
+                  when others => 
+                     Discard; 
+                     return new Lexical_Element'( Delimiter, Ada_Delimiter(Current) );
+               end case;
             
             when '' => 
-               case Lookahead_Char(1) = '' is 
-                  when '' => Advance(1, new Delimiter_Element'()); 
+               case Lookahead = '' is 
+                  when '' => Discard(2); return new Lexical_Element'(Delimiter, ); 
                   when others => <error>; 
                end case;
             
             when '' => 
-               case Lookahead_Char(1) = '' is 
-                  when '' => Advance(1, new Delimiter_Element'()); 
+               case Lookahead = '' is 
+                  when '' => Discard(2); return new Lexical_Element'(Delimiter, ); 
                   when others => <error>; 
                end case;
             
-            when '' => 
-               case Lookahead_Char(1) = '' is 
-                  when '' => Advance(1, new Delimiter_Element'()); 
-                  when others => <error>; 
-               end case;
             
-            when '' => 
-               case Lookahead_Char(1) = '' is 
-                  when '' => Advance(1, new Delimiter_Element'()); 
-                  when others => <error>; 
-               end case;
-            
-            when '' => 
-               case Lookahead_Char(1) = '' is 
-                  when '' => Advance(1, new Delimiter_Element'()); 
-                  when others => <error>; 
-               end case;
-            
-            when '' => 
-               case Lookahead_Char(1) = '' is 
-                  when '' => Advance(1, new Delimiter_Element'()); 
-                  when others => <error>; 
-               end case;
-            
-            when '' => 
-               case Lookahead_Char(1) = '' is 
-                  when '' => Advance(1, new Delimiter_Element'()); 
-                  when others => <error>; 
-               end case;
-            
-            when '' => 
-               case Lookahead_Char(1) = '' is 
-                  when '' => Advance(1, new Delimiter_Element'()); 
-                  when others => <error>; 
-               end case;
-            
-            when '' => 
-               case Lookahead_Char(1) = '' is 
-                  when '' => Advance(1, new Delimiter_Element'()); 
-                  when others => <error>; 
-               end case;
-            
-            when others =>
-               
             when '' => Advance (2, new Delimiter_Element'());
 
+            when others =>
+               
 
 
 => arrow
@@ -258,3 +294,5 @@ is
 end ECLAT.Lexical;
 
 --\
+-----------------------------------------------------------------------------------------------
+
