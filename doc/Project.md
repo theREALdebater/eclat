@@ -26,7 +26,7 @@ Thus, the AdaOS Project will be an [open source](https://opensource.org/) projec
 -----------------------------------------------------------------------------------------------
 ## Members
 
-As of April 2019, the members of The AdaOS Project are:
+As of June 2019, the members of The AdaOS Project are:
 
  - Nick Roberts 
     - Nicholas James Roberts (Reigate, UK)
@@ -46,5 +46,5 @@ Email: [nick.roberts@acm.org](mailto:nick.roberts@acm.org)
 
 I am seeking contributors and supporters for this project.
 
-By the way, I am from the UK, so please forgive me if my spelling sometimes seems strange. I intend the identifiers in all the project's source text to have North American spelling. 
+By the way, I am from the UK, so please forgive me if my spelling sometimes seems strange. I intend the identifiers in all the project’s source text to have North American spelling. 
 

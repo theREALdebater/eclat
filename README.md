@@ -3,24 +3,24 @@
 # Experimental Compiler Library And Tools
 
 Author: Nick Roberts
-Date: April 2019
+Date: June 2019
 
 __ECLAT__ is going to be a compiler for multiple programming languages, targeting multiple 
 instruction set architectures and platforms (operating systems). 
 
 ECLAT is in three parts:
 
-* the compiler
-* the builder
-* the realizor
+ * the compiler
+ * the builder
+ * the realizor
 
 The compiler compiles source text into libraries. The builder builds pseudo-code modules from 
-libraries. The realizor 'realises' modules into directly executable machine code. 
+libraries. The realizor ‘realises’ modules into directly executable machine code. 
 
 -----------------------------------------------------------------------------------------------
 ## Current Status
 
-As of April 2019:
+As of June 2019:
 
 Just starting.
 
@@ -43,7 +43,7 @@ The objectives of this part of the project are:
 -----------------------------------------------------------------------------------------------
 ## Plan of Action
 
-As of April 2019:
+As of June 2019:
 
  1. Make a minimal ECLAT capable of self-hosting 
  2. Add stuff on from there
@@ -55,7 +55,7 @@ the standard libraries will be implemented.
 There is no timeline at this stage.
 
 -----------------------------------------------------------------------------------------------
-## What Does 'Self-Hosting' Mean?
+## What Does ‘Self-Hosting’ Mean?
 
 A compiler can be self-hosting if it can compile itself and build itself to the point of being 
 able to run. Obviously a compiler can only be self-hosting if it is written in the same 
@@ -66,7 +66,7 @@ Until a compiler is self-hosting, it must be possible to compile it using some o
 ECLAT is written in Ada. In the case of ECLAT, I am aiming for it to become self-hosting. Until 
 it does, it will be compiled using GNAT (see <https://www.adacore.com/community>). 
 
-I'm not ruling out the possibility of using other languages in the development of ECLAT, but I 
+I’m not ruling out the possibility of using other languages in the development of ECLAT, but I 
 don't have plans in that direction at this point. 
 
 -----------------------------------------------------------------------------------------------
