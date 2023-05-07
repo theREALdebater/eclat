@@ -1,0 +1,153 @@
+-----------------------------------------------------------------------------------------------
+## Allegra 
+
+.....
+
+[Allegra](../allegra/allegra.md) 
+script to accomplish a single, specific piece of work. 
+
+
+
+
+### Builtins (#builtins)
+
+Kronos adds one object, named `Kronos`, to the Allegra context. 
+
+The Kronos object has several sub-objects and methods.
+
+
+.....
+
+
+
+### Jobs
+
+The object `Kronos.Jobs` represents the list of all jobs known to Kronos. 
+
+
+
+### Find
+
+The method `Find` of the `Kronos.Jobs` object returns an object that represents a job. The job 
+returned is the one whose name matches the name given as a parameter of `Find`. 
+
+`Find` returns `null` if no job matches the name. 
+
+
+### `Trigger`
+
+A job object has the `Trigger` method, which causes the job to be executed unless it has 
+already started (including having started and completed). 
+
+
+
+
+-----------------------------------------------------------------------------------------------
+## Program Identifiers
+
+..... type `Program_Identifier` .....
+
+
+
+
+
+
+
+```ada
+   ??????type Program_List is array (Positive range <>) of Program_Identifier;
+
+   procedure Register (Registry: access Program_Registry;
+                       Name:     in String; 
+                       Context:  in Program_Context'Class;
+                       ID:       out Program_Identifier) is abstract;
+
+   ??????function Registered (Registry: access Program_Registry) return Program_List is abstract;
+   
+   function Is_Registered (Registry: access Program_Registry;
+                           ID:       in Program_Identifier) return Boolean is abstract;
+
+   function Name (Registry: access Program_Registry;
+                  ID:       in Program_Identifier) return String is abstract;
+
+   function Context (Registry: access Program_Registry;
+                     ID:       in Program_Identifier) 
+      return 
+         Program_Context'Class is abstract;
+```
+
+.....
+
+
+
+
+Tethys .......
+
+```ada
+
+
+   function Programs (Controller: access Service_Controller) 
+   return 
+      System.Execution.Program_Registry'Class 
+   is 
+      abstract;
+
+
+```
+
+
+-----------------------------------------------------------------------------------------------
+## Program Registration
+
+.....
+
+
+
+
+```ada
+package Foo
+with
+   Pre?????_Elaboration
+is
+   type Bar is new System.Services.Controlled.Controlled_Service with private;
+   -- public operations of Bar
+private
+   -- private stuff
+end;
+```
+
+.....
+
+```ada
+package body Foo
+is
+   -- implementations of the public operations of Bar   
+   function Create_Service return System.Services.Controlled.Controlled_Service_Access is (new Bar);
+   ID: System.Execution.Program_Identifier; -- identifier of program as registered
+begin
+   declare
+      Tethys: access System.Services.Service_Controller'Class := 
+         System.Execution.Self.Services.Engage ("tethys");
+   begin
+      if Tethys /= null
+      then
+         declare
+            Program: System_Program'Class := new Tethys.Service_Context ("acme.unibar");
+         begin
+            Tethys.Programs.Insert ( ("acme.unibar", Context, ID);
+         end;
+      end if;
+   end;
+end;
+
+-----
+with System.Execution;
+procedure Main
+is
+begin
+   System.Services.Await_Program_Termination;
+end;
+```
+
+.....
+
+

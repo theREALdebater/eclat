@@ -1,0 +1,466 @@
+;---------------------------------------------------------------------------------------------
+; 
+; Copyright (C) 2019 The AdaOS Project
+; 
+; This file is part of ECLAT.
+; 
+; ECLAT is free software: you can redistribute it and/or modify it under the terms of the GNU 
+; General Public License as published by the Free Software Foundation, either version 3 of 
+; the License, or (at your option) any later version. 
+; 
+; ECLAT is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without 
+; even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the 
+; GNU General Public License for more details. 
+; 
+; You should have received a copy of the GNU General Public License along with ECLAT.  If 
+; not, see <http://www.gnu.org/licenses/>. 
+; 
+;---------------------------------------------------------------------------------------------
+; 
+; Ada 2012 Syntax
+;
+; Taken from the Ada 2012 Reference Manual (ISO/IEC 8652:2012(E), TC1 (COR.1:2016))
+; 
+; The RM itself has the following copyright holders:
+;    Copyright (C) 1992, 1993, 1994, 1995 Intermetrics, Inc.
+;    Copyright (C) 2000 The MITRE Corporation, Inc.
+;    Copyright (C) 2004, 2005, 2006 AXE Consultants
+;    Copyright (C) 2004, 2005, 2006 Ada-Europe
+;    Copyright (C) 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016 AXE Consultants
+
+;---------------------------------------------------------------------------------------------
+; 3.1 Declarations
+
+basic_declaration 
+::=
+   type_declaration |
+   subtype_declaration |
+   object_declaration |
+   number_declaration |
+   subprogram_declaration |
+   abstract_subprogram_declaration |
+   null_procedure_declaration |
+   expression_function_declaration |
+   package_declaration |
+   renaming_declaration |
+   exception_declaration |
+   generic_declaration |
+   generic_instantiation .
+
+defining_identifier ::= identifier .
+
+;---------------------------------------------------------------------------------------------
+; 3.2.1 Type Declarations
+
+type_declaration 
+::=
+   full_type_declaration | 
+   incomplete_type_declaration | 
+   private_type_declaration | 
+   private_extension_declaration .
+   
+full_type_declaration 
+::=
+   other_type_declaration | 
+   task_type_declaration | 
+   protected_type_declaration .
+   
+other_type_declaration 
+::= 
+   "type" 
+   defining_identifier 
+   [ known_discriminant_part ] 
+   "is" 
+   type_definition 
+   [ aspect_specification ] 
+   ";" .
+
+type_definition 
+::=
+   enumeration_type_definition | 
+   integer_type_definition | 
+   real_type_definition | 
+   array_type_definition | 
+   record_type_definition | 
+   access_type_definition | 
+   derived_type_definition | 
+   interface_type_definition .
+   
+;---------------------------------------------------------------------------------------------
+; 3.2.2 Subtype Declarations
+
+subtype_declaration 
+::= 
+   "subtype" 
+   defining_identifier 
+   "is" 
+   subtype_indication 
+   [ aspect_specification ] 
+   ";" .
+
+subtype_indication 
+::= 
+   [ null_exclusion ] 
+   subtype_mark 
+   [ constraint ] .
+
+subtype_mark ::= subtype_name .
+
+constraint 
+::= 
+   scalar_constraint | 
+   composite_constraint .
+
+scalar_constraint 
+::=
+   range_constraint | 
+   digits_constraint | 
+   delta_constraint .
+
+composite_constraint 
+::=
+   index_constraint | 
+   discriminant_constraint .
+
+;---------------------------------------------------------------------------------------------
+; 3.3.1 Object Declarations
+
+object_declaration 
+::=
+   object_declaration_subtype |
+   object_declaration_access |
+   object_declaration_array | 
+   single_task_declaration | 
+   single_protected_declaration .
+
+object_declaration_subtype 
+::= 
+   defining_identifier_list 
+   ":" 
+   [ "aliased" ] 
+   [ "constant" ] 
+   subtype_indication 
+   [ object_initialization ] 
+   [ aspect_specification ] 
+   ";" .
+
+object_declaration_access ::= 
+   defining_identifier_list 
+   ":" 
+   [ "aliased" ] 
+   [ "constant" ] 
+   access_definition 
+   [ object_initialization ] 
+   [ aspect_specification ] 
+   ";" .
+
+object_declaration_array ::=
+   defining_identifier_list 
+   ":" 
+   [ "aliased" ] 
+   [ "constant" ] 
+   array_type_definition 
+   [ object_initialization ] 
+   [ aspect_specification ] 
+   ";" .
+
+defining_identifier_list 
+::= 
+   defining_identifier 
+   { "," defining_identifier } .
+
+object_initialization ::= ":=" expression .
+
+;---------------------------------------------------------------------------------------------
+; 3.3.2 Number Declarations
+
+number_declaration 
+::=
+   defining_identifier_list 
+   ":" 
+   "constant"
+   ":=" 
+   static_ expression 
+   ";" .
+
+;---------------------------------------------------------------------------------------------
+; 3.4 Derived Types and Classes
+
+derived_type_definition ::=
+   [ "abstract" ] 
+   [ "limited" ] 
+   "new" 
+   parent_subtype_indication 
+   [ record_extension_definition ] .
+   
+record_extension_definition
+::=
+   [ "and" interface_list ]
+   record_extension_part .
+
+;---------------------------------------------------------------------------------------------
+; 3.5 Scalar Types
+
+range_constraint ::= "range" range .
+
+range 
+::= 
+   range_attribute_reference |
+   explicit_range .
+
+explicit_range ::=  lower_bound_expression ".." upper_bound_expression .
+
+lower_bound_expression ::= simple_expression .
+
+upper_bound_expression ::= simple_expression .
+
+;---------------------------------------------------------------------------------------------
+; 3.5.1 Enumeration Types
+
+enumeration_type_definition ::=
+   "(" 
+   enumeration_literal_list
+   ")" .
+   
+enumeration_literal_list
+::=
+   enumeration_literal_specification 
+   { "," enumeration_literal_specification } .
+
+enumeration_literal_specification 
+::= 
+   defining_identifier | 
+   defining_character_literal
+   
+defining_character_literal ::= character_literal .
+
+;---------------------------------------------------------------------------------------------
+; 3.5.4 Integer Types
+
+integer_type_definition 
+::= 
+   signed_integer_type_definition | 
+   modular_type_definition .
+
+signed_integer_type_definition 
+::= 
+   "range" 
+   lower_bound_expression 
+   ".." 
+   upper_bound_expression .
+   ; both bounds must be static
+
+modular_type_definition ::= "mod" static_expression .
+
+;---------------------------------------------------------------------------------------------
+; 3.5.6 Real Types
+
+real_type_definition 
+::=
+   floating_point_definition | 
+   fixed_point_definition .
+
+;---------------------------------------------------------------------------------------------
+; 3.5.7 Floating Point Types
+
+floating_point_definition 
+::=
+   "digits" 
+   static_ expression 
+   [ real_range_specification ] .
+
+real_range_specification ::=
+   "range" 
+   lower_bound_expression 
+   ".." 
+   upper_bound_expression .
+   ; both bounds must be static
+
+;---------------------------------------------------------------------------------------------
+; 3.5.9 Fixed Point Types
+
+fixed_point_definition 
+::= 
+   ordinary_fixed_point_definition | 
+   decimal_fixed_point_definition .
+
+ordinary_fixed_point_definition 
+::=
+   "delta" 
+   static_expression 
+   real_range_specification .
+
+decimal_fixed_point_definition 
+::=
+   "delta" 
+   static_expression 
+   "digits" 
+   static_expression 
+   [ real_range_specification ] .
+
+digits_constraint ::=
+   "digits" 
+   static_simple_expression 
+   [ range_constraint ] .
+
+;---------------------------------------------------------------------------------------------
+; 3.6 Array Types
+
+
+
+;---------------------------------------------------------------------------------------------
+; 
+
+;---------------------------------------------------------------------------------------------
+; 
+
+;---------------------------------------------------------------------------------------------
+; 
+
+;---------------------------------------------------------------------------------------------
+; 
+
+;---------------------------------------------------------------------------------------------
+; 
+
+;---------------------------------------------------------------------------------------------
+; 
+
+;---------------------------------------------------------------------------------------------
+; 
+
+;---------------------------------------------------------------------------------------------
+; 
+
+;---------------------------------------------------------------------------------------------
+; 
+
+;---------------------------------------------------------------------------------------------
+; 
+
+;---------------------------------------------------------------------------------------------
+; 
+
+;---------------------------------------------------------------------------------------------
+; 
+
+;---------------------------------------------------------------------------------------------
+; 
+
+;---------------------------------------------------------------------------------------------
+; 
+
+;---------------------------------------------------------------------------------------------
+; 
+
+;---------------------------------------------------------------------------------------------
+; 
+
+;---------------------------------------------------------------------------------------------
+; 
+
+;---------------------------------------------------------------------------------------------
+; 
+
+;---------------------------------------------------------------------------------------------
+; 
+
+;---------------------------------------------------------------------------------------------
+; 
+
+;---------------------------------------------------------------------------------------------
+; 
+
+;---------------------------------------------------------------------------------------------
+; 
+
+;---------------------------------------------------------------------------------------------
+; 
+
+;---------------------------------------------------------------------------------------------
+; 
+
+;---------------------------------------------------------------------------------------------
+; 
+
+;---------------------------------------------------------------------------------------------
+; 
+
+;---------------------------------------------------------------------------------------------
+; 
+
+;---------------------------------------------------------------------------------------------
+; 
+
+;---------------------------------------------------------------------------------------------
+; 
+
+;---------------------------------------------------------------------------------------------
+; 
+
+;---------------------------------------------------------------------------------------------
+; 
+
+;---------------------------------------------------------------------------------------------
+; 
+
+;---------------------------------------------------------------------------------------------
+; 
+
+;---------------------------------------------------------------------------------------------
+; 
+
+;---------------------------------------------------------------------------------------------
+; 
+
+;---------------------------------------------------------------------------------------------
+; 
+
+;---------------------------------------------------------------------------------------------
+; 
+
+;---------------------------------------------------------------------------------------------
+; 
+
+;---------------------------------------------------------------------------------------------
+; 
+
+;---------------------------------------------------------------------------------------------
+; 
+
+;---------------------------------------------------------------------------------------------
+; 
+
+;---------------------------------------------------------------------------------------------
+; 
+
+;---------------------------------------------------------------------------------------------
+; 
+
+;---------------------------------------------------------------------------------------------
+; 
+
+;---------------------------------------------------------------------------------------------
+; 
+
+;---------------------------------------------------------------------------------------------
+; 
+
+;---------------------------------------------------------------------------------------------
+; 
+
+;---------------------------------------------------------------------------------------------
+; 
+
+;---------------------------------------------------------------------------------------------
+; 
+
+;---------------------------------------------------------------------------------------------
+; 
+
+;---------------------------------------------------------------------------------------------
+; 
+
+;---------------------------------------------------------------------------------------------
+; 
+

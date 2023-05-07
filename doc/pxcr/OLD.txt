@@ -1,0 +1,225 @@
+-----------------------------------------------------------------------------------------------
+## Module Registries
+
+A _plugin registry_ keeps information about a set of plugins. 
+
+.....
+
+The interface type `Module_Registry` is declared in the package `System.Modules`. An object of 
+a type in this type's class is a plugin registry. 
+
+......
+
+
+
+```ada
+type Module_Count is range 0 .. 1000;   
+subtype Module_Index is Module_Count range 1 .. Plugin_Count'Last;
+```
+
+
+
+
+```ada
+procedure Register (Registry: access Plugin_Registry;
+                    Module:   in Plugin_Module;
+                    Index:    out Plugin_Index) is abstract;
+```
+
+.....
+
+```ada
+function Count (Registry: access Plugin_Registry) return Plugin_Count is abstract;
+   
+```
+
+.....
+
+```ada
+function Module (Registry: access Plugin_Registry;
+                 Index:    in Plugin_Index) return Plugin_Module is abstract;
+```
+
+.....
+
+
+
+
+
+
+
+-----------------------------------------------------------------------------------------------
+## Plugin Tables
+
+For each plugin class, the Realizor generates a pseudo-export, termed a _plugin table_, which 
+can be imported using the name `C.plugins`, where `C` is replaced by the name 
+of the plugin class. 
+
+A plugin table is of the type `Plugin_Array`, declared in the package `System.Modules`. It is 
+simply an array of plugin descriptors. 
+
+```ada
+type Plugin_Array is array (Positive range <>) of Plugin_Module;
+```
+
+
+
+.....
+
+.....
+
+
+
+```ada
+```
+
+.....
+
+```ada
+procedure Initialize (Plugin:   in out Plugin_Module;
+                      Registry: access Plugin_Registry'Class := null);
+```
+
+.....
+
+```ada
+function Registry (Plugin: in Plugin_Module) return access Plugin_Registry'Class;
+```
+
+.....
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+For example, declaring a plugin table object and importing it might look like this:
+
+```ada
+Fruit_Plugins: constant System.Modules.Plugin_Array
+with
+   Import,
+   External_Name => "adaos.pxcr.plugins.acme.farming.fruit";
+```
+
+Then it would be possible to initialise every plugin in the plugin class `acme.farming.fruit` 
+with code like this:
+
+```ada
+declare
+   Registry: aliased .....
+begin
+   for Plugin of Fruit_Plugins loop
+      System.Modules.Initialize (Plugin, Registry'Access);
+   end loop;
+   .....
+end;
+```
+
+The call to the `Initialize` procedure for each element of the plugin table calls into the 
+initialisation procedure of each plugin in the `acme.farming.fruit` plugin class. 
+
+.....
+
+```ada
+   Initialization_Error: exception;
+```
+
+.....
+
+
+
+
+
+
+-----------------------------------------------------------------------------------------------
+## Module Descriptors
+
+A _module descriptor_ contains some information about a plugin that is available to the 
+registry (q.v.) ......
+
+The private type `System_Module` is declared in `System.Modules`. An object of this type is a 
+plugin descriptor. 
+
+The function `Name` is declared as follows:
+
+```ada
+   function Name (Module: in System_Module) return Wide_String;
+```
+
+This function returns the name of a plugin. The name of a plugin  is [configured](#config). 
+
+The functions `Fulfils` and `Needs` are also declared, which are used to establish [plugin 
+dependencies](#deps). 
+
+
+
+-----------------------------------------------------------------------------------------------
+## Plugin Dependencies {#deps}
+
+.....
+
+.....
+
+The function `Fulfils` is declared as follows:
+
+```ada
+   function Fulfils (Module:      in Plugin_Module;
+                     Requirement: in Wide_String) return Boolean is abstract;
+```
+
+This function returns `True` if the plugin is able to fulfil the given requirement. 
+
+.....
+
+The function `Needs` is declared as follows:
+
+```ada
+   type Requirement_List is array (Positive range <>) of Wide_String;
+
+   function Needs (Module: in Plugin_Module) return Requirement_List is abstract;
+```
+
+This function returns a set of requirements that the plugin depends on. 
+
+
+
+.....
+
+The fulfilments and requirements of plugins are [configured](#config). 
+
+
+
+
+Somewhere in the execution of the host program, usually during its intialisation code, the 
+host's plugins must be initialised. This can be done by declaring:
+
+```ada
+Fruit_Plugins: constant System.Modules.Plugin_Array
+with
+   Import,
+   External_Name => "adaos.pxcr.plugins.acme.farming.fruit";
+
+Registry: aliased Fruit_Registration.Fruit_Plugin_Registry;
+```
+
+and, in the initialisation code of the host, calling:
+
+```ada
+-- activities pre-initialisation
+
+for Plugin of Fruit_Plugins loop
+   System.Modules.Initialize (Plugin, Registry'Access);
+end loop;
+
+-- activities post-initialisation
+```
+

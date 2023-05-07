@@ -1,0 +1,128 @@
+### Example
+
+Let us look into the implementation of a remote procedure `Eat`, which is a primitive operation 
+of the type `Plum`. The type `Plum` is derived from a type delared in a remote types package, 
+so that its primitive operations, including `Eat`, are remote subprograms. 
+
+We will suppose that only people who have a strong stomach are permitted to eat plums over a 
+certain weight. 
+
+```ada
+with Measures;
+
+package body Prunae
+is
+   procedure Eat (Food: in out Plum)
+   is
+      Endorsement: 
+   
+      Time_of_Call:        constant Ada.Calendar.Time := Ada.Calendar.Clock;
+      Caller_Identity:     constant Eat'Caller_Identity;
+      Caller_Authority:    constant Eat'Caller_Authority;
+      Weight_of_Plum:      constant Measures.Kilogrammes := Weight (Food);
+      Permission_Granted:  Boolean := False;
+      Auditing_Required:   Boolean := False;
+
+      pragma Endorsement_Input (Time_of_Call);
+      pragma Endorsement_Input (Caller_Identity);
+      pragma Endorsement_Input (Caller_Authority);
+      pragma Endorsement_Input (Weight_of_Plum);
+      pragma Endorsement_Output (Permission_Granted);
+      pragma Endorsement_Output (Auditing_Required);
+
+   begin
+      -- (log request to eat Food)
+
+      Prunae_Guardian.Endorse_Eat (Time_of_Call, 
+                                   Caller_Identity, 
+                                   Caller_Authority, 
+                                   Weight_of_Food, 
+                                   Permission_Granted, 
+                                   Auditing_Required);
+
+      if Auditing_Required then
+         -- (audit request to eat Food)
+      end if;
+
+      if Permission_Granted then
+
+         if Auditing_Required then
+            -- (audit permission granted to eat Food)
+         end if;
+
+         -- (log permission granted to eat Food)
+
+         begin
+            -- (eat the Food)
+         exception
+            when others =>
+               if Auditing_Required then
+                  -- (audit failure to eat Food)
+               end if;
+
+               -- (log failure to eat Food)
+         end;
+
+      else
+
+         if Auditing_Required then
+            -- (audit permission denied to eat Food)
+         end if;
+
+         -- (log permission denied to eat Food)
+         
+         raise Permission_Denied;
+
+      end if;
+   end Eat;
+   
+   -- (other contents of the package body)
+
+end Prunae;
+```
+
+We pass the weight of the plum into the guardian, and leave it to the guardian to work out 
+whether the caller has a strong enough stomach to eat the plum. 
+
+It is expected that the date and time of the call is also passed in as an attribute 
+`Time_of_Call`. That would, for example, enable us at a later point to add a rule that plums 
+may not be eaten after midnight, or that they may not be eaten in September. Only the 
+(specification data governing the) guardian would need to be changed; the Ada source text could 
+remain untouched, and nothing would need to be recompiled or rebuilt. Only the executable would 
+have to be re-realised, which would (automatically) entail the guardian being regenerated. 
+
+The same library will need to include a declaration of the package `Prunae_Guardian`, with a 
+specification such as:
+
+```ada
+with Measures;
+
+package Prunae_Guardian
+is
+   pragma Endorsement_Interface (Prunae_Guardian);
+
+   procedure Endorse_Eat (Time_of_Call:      Ada.Calendar.Time;
+                          Caller_Identity:   System.Security.Caller_Identity, 
+                          Caller_Authority:  System.Security.Caller_Authority, 
+                          Weight_of_Food:    Measures.Kilogrammes, 
+                          Permitted:         Boolean, 
+                          Auditing_Required: Boolean)
+      with 
+         Import, 
+         External_Name => "prunae-guardian.endorse-eat";
+
+   -- other endorsement procedures
+   
+   pragma Endorsement_Procedure (Endorse_Eat);
+   -- etc. for the other endorsement procedures
+   
+end;
+```
+
+Normally, packages of this kind would be put into a [stub library](?????). Libraries using it 
+would be configured to depend on it. 
+
+The implementations of the endorsement procedures will be imported from the generated guardian 
+module. 
+
+

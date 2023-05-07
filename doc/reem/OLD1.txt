@@ -1,0 +1,234 @@
+-----------------------------------------------------------------------------------------------
+## Reemer Programs
+
+.....
+
+A package does not need to use the [REEM Executive Service](../services/reem.md) to ......
+
+Instead, ........ a program to perform some or all of the REEM functionality. such a program is known as a _reemer_. 
+
+......
+
+A reemer is itself a program, and so it will generally need to be installed as a part of the 
+installation of the package. 
+
+
+
+??????However, the installation of the reemer can be, and should be, in a separate [role](?????), 
+that has only the permissions necessary for the reemer to do its job. Typically, the 
+permissions it needs are much more restricted than the subject program itself. 
+
+
+
+The installer, having installed the reemer, then executes the reemer and awaits the results. If 
+the reemer reports one or more [unresolved failures](#failure), the installation is then 
+aborted (and thus, hopefully, rolled back). 
+
+
+
+
+
+
+
+-----------------------------------------------------------------------------------------------
+## 
+
+
+
+
+-----------------------------------------------------------------------------------------------
+## 
+
+
+
+
+-----------------------------------------------------------------------------------------------
+## 
+
+
+
+
+-----------------------------------------------------------------------------------------------
+## REEM Instances
+
+When the reemer (program) is run, it expects to be passed a _REEM instance identifier_ within 
+its program arguments. 
+
+......
+
+```ada
+   type REEM_Instance_Id is new Wide_String;
+```
+
+One of the program arguments should be the constant:
+
+    --reem-id
+    
+The following argument should then hold the value of the REEM instance identifier. 
+
+If this option is not suppplied, the reemer should invent a random instance identifier. The 
+recommended method is to generate a new [UUID][1] and convert it to a string. 
+
+Any other arguments passed to the reemer will be specific to the reemer. 
+
+
+
+-----------------------------------------------------------------------------------------------
+## 
+
+
+
+
+-----------------------------------------------------------------------------------------------
+## Events
+
+Reemers communicate their results by sending [events](../events/events.md) to the event channel:
+
+    system.reem
+
+........
+
+```ada
+   type REEM_Event is interface and System.Events.System_Event;
+   
+   function ID (Event: in REEM_Event) return REEM_Instance_Id is abstract;
+   
+   function Message (Event: in REEM_Event) return Wide_String is abstract;
+```
+
+
+
+-----------------------------------------------------------------------------------------------
+## 
+
+
+
+
+-----------------------------------------------------------------------------------------------
+## Initiation
+
+Before doing anything, except perhaps a minimum of self-initialisation, a reemer should send an 
+event in the class of the following type: 
+
+```ada
+   type REEM_Initiation_Event 
+   is 
+      new System.Events.System_Event
+   with
+      record
+         ID: REEM_Instance_Id;
+         Mode: access constant Wide_String := null; -- null implies 'normal' mode
+      end record;
+```
+
+The component `Mode` is simply descriptive text giving an idea of what mode the reemer is 
+executing in. Leave this null if it is irrelevant or if the reemer is executing normally and 
+with behaviour not modified by any external parameters (for example, program arguments). 
+
+
+
+-----------------------------------------------------------------------------------------------
+## 
+
+
+
+
+-----------------------------------------------------------------------------------------------
+## Execution
+
+......
+
+
+
+
+
+
+It is advisable for a reemer to regularly detect incoming [signals](../rtc/signals.md), so it 
+can respond to them in a timely manner. 
+
+
+
+......
+
+
+
+
+-----------------------------------------------------------------------------------------------
+## 
+
+
+
+
+-----------------------------------------------------------------------------------------------
+## Success and Failure {#failure}
+
+.......
+
+
+
+```ada
+   type REEM_Outcome_Event 
+   is 
+      new System.Events.System_Event
+   with
+      record
+         ID: REEM_Instance_Id;
+         Failure: Boolean := False;
+         Action: not null access constant Wide_String;
+         Outcome: access constant Wide_String := null; -- null implies not relevant
+      end record;
+```
+
+
+
+
+
+
+-----------------------------------------------------------------------------------------------
+## Completion
+
+
+
+
+
+```ada
+   type REEM_Completion_Event 
+   is 
+      new System.Events.System_Event
+   with
+      record
+         ID: REEM_Instance_Id;
+         Failure: Boolean := False;
+         Mode: access constant Wide_String := null; -- null implies 'normal' mode
+      end record;
+```
+
+
+
+
+
+
+-----------------------------------------------------------------------------------------------
+## 
+
+
+
+
+-----------------------------------------------------------------------------------------------
+## 
+
+
+
+
+-----------------------------------------------------------------------------------------------
+## Skeleton Reemer
+
+ECLAT comes with the skeleton of the source text of a reemer program, ......
+
+
+
+
+
+
+
+

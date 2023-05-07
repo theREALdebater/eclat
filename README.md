@@ -2,8 +2,8 @@
 # __ECLAT__
 # Experimental Compiler Library And Tools
 
-Author: Nick Roberts
-Date: June 2019
+Author: Nick Roberts  
+Date:   June 2019  
 
 __ECLAT__ is going to be a compiler for multiple programming languages, targeting multiple 
 instruction set architectures and platforms (operating systems). 
@@ -30,7 +30,7 @@ Just starting.
 The objectives of this part of the project are:
 
  * An alternative to the GNAT/GCC technology. This is the only open-source Ada compiler 
-   currently available, to my knowledge, and I think it would be healthier for there to be more 
+   currently available, to my knowledge, and I think it would be healthier for there to be more
    than just one.
 
  * A compiler that demonstrates state-of-the-art optimisation techniques (eventually).

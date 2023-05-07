@@ -1,0 +1,2643 @@
+;---------------------------------------------------------------------------------------------
+; 
+; Copyright (C) 2019 The AdaOS Project
+; 
+; This file is part of ECLAT.
+; 
+; ECLAT is free software: you can redistribute it and/or modify it under the terms of the GNU 
+; General Public License as published by the Free Software Foundation, either version 3 of 
+; the License, or (at your option) any later version. 
+; 
+; ECLAT is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without 
+; even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the 
+; GNU General Public License for more details. 
+; 
+; You should have received a copy of the GNU General Public License along with ECLAT.  If 
+; not, see <http://www.gnu.org/licenses/>. 
+; 
+;---------------------------------------------------------------------------------------------
+; 
+; Ada 2012 Syntax
+;
+; Taken from the Ada 2012 Reference Manual (ISO/IEC 8652:2012(E), TC1 (COR.1:2016))
+; 
+; The RM itself has the following copyright holders:
+;   Copyright (C) 1992, 1993, 1994, 1995 Intermetrics, Inc.
+;   Copyright (C) 2000 The MITRE Corporation, Inc.
+;   Copyright (C) 2004, 2005, 2006 AXE Consultants
+;   Copyright (C) 2004, 2005, 2006 Ada-Europe
+;   Copyright (C) 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016 AXE Consultants
+
+;---------------------------------------------------------------------------------------------
+; 3.1 Declarations
+
+define
+   basic_declaration
+oneof:
+   type_declaration
+   subtype_declaration
+   object_declaration
+   number_declaration
+   subprogram_declaration
+   abstract_subprogram_declaration
+   null_procedure_declaration
+   expression_function_declaration
+   package_declaration
+   renaming_declaration
+   exception_declaration
+   generic_declaration
+   generic_instantiation
+end
+
+define
+   defining_identifier
+as
+   identifier
+
+;---------------------------------------------------------------------------------------------
+; 3.2.1 Type Declarations
+
+define
+   type_declaration 
+oneof:
+   full_type_declaration
+   incomplete_type_declaration
+   private_type_declaration
+   private_extension_declaration
+end
+
+define
+   full_type_declaration 
+oneof:
+   other_type_declaration
+   task_type_declaration
+   protected_type_declaration
+end
+
+define
+   other_type_declaration 
+seq:
+   "type" 
+   defining_identifier 
+   [known_discriminant_part]
+   "is" 
+   type_definition 
+   [aspect_specification]
+   ";"
+end
+
+define
+   type_definition 
+oneof:
+   enumeration_type_definition
+   integer_type_definition
+   real_type_definition
+   array_type_definition
+   record_type_definition
+   access_type_definition
+   derived_type_definition
+   interface_type_definition
+end
+
+;---------------------------------------------------------------------------------------------
+; 3.2.2 Subtype Declarations
+
+define
+   subtype_declaration 
+seq:
+   "subtype" 
+   defining_identifier 
+   "is" 
+   subtype_indication 
+   [aspect_specification]
+   ";"
+end
+
+define
+   subtype_indication 
+seq:
+   [null_exclusion]
+   subtype_mark
+   [constraint]
+end
+
+define
+   subtype_mark
+as
+   subtype_name
+
+define
+   constraint 
+oneof:
+   scalar_constraint
+   composite_constraint
+end
+
+define
+   scalar_constraint 
+oneof:
+   range_constraint
+   digits_constraint
+   delta_constraint
+end
+
+define
+   composite_constraint 
+oneof:
+   index_constraint
+   discriminant_constraint
+end
+
+;---------------------------------------------------------------------------------------------
+; 3.3.1 Object Declarations
+
+define
+   object_declaration 
+oneof:
+   object_declaration_subtype
+   object_declaration_access
+   object_declaration_array
+   single_task_declaration
+   single_protected_declaration
+end
+
+define
+   object_declaration_subtype 
+seq:
+   defining_identifier_list 
+   ":" 
+   [aliased_prefix]
+   [constant_prefix]
+   subtype_indication 
+   [object_initialization]
+   [aspect_specification]
+   ";"
+end
+
+defined
+   aliased_prefix
+as
+   "aliased"
+
+define
+   constant_prefix
+as
+   "constant"
+
+define
+   object_declaration_access
+seq:
+   defining_identifier_list 
+   ":" 
+   [aliased_prefix]
+   [constant_prefix] 
+   access_definition 
+   [object_initialization]
+   [aspect_specification]
+   ";"
+end
+
+define
+   object_declaration_array
+seq:
+   defining_identifier_list 
+   ":" 
+   [aliased_prefix]
+   [constant_prefix] 
+   array_type_definition
+   [object_initialization]
+   [aspect_specification]
+   ";"
+end
+
+define
+   defining_identifier_list 
+repeat
+   defining_identifier
+separator
+   ","
+
+define
+   object_initialization
+seq:
+   ":=" 
+   expression
+end
+
+;---------------------------------------------------------------------------------------------
+; 3.3.2 Number Declarations
+
+define
+   number_declaration 
+seq:
+   defining_identifier_list 
+   ":" 
+   "constant"
+   ":=" 
+   static_expression 
+   ";"
+end
+
+;---------------------------------------------------------------------------------------------
+; 3.4 Derived Types and Classes
+
+define
+   derived_type_definition
+seq:
+   [abstract_prefix] 
+   [limited_prefix] 
+   "new" 
+   parent_subtype_indication 
+   [record_extension_definition]
+end
+
+define
+   limited_prefix
+as
+   "limited"
+
+define
+   parent_subtype_indication
+as
+   subtype_indication
+
+define
+   record_extension_definition
+seq:
+   [additional_interfaces]
+   record_extension_part
+end
+
+define
+   additional_interfaces
+seq:
+   "and"
+   interface_list
+end
+
+;---------------------------------------------------------------------------------------------
+; 3.5 Scalar Types
+
+define
+   range_constraint
+seq:
+   "range" 
+   discrete_range
+end
+
+define
+   discrete_range 
+oneof:
+   range_attribute_reference
+   explicit_range
+end
+
+define
+   explicit_range
+seq:
+   lower_bound_expression 
+   ".." 
+   upper_bound_expression
+end
+
+define
+   lower_bound_expression
+as
+   simple_expression
+
+define
+   upper_bound_expression
+as
+   simple_expression
+   
+define
+   simple_expression
+as
+   expression
+
+;---------------------------------------------------------------------------------------------
+; 3.5.1 Enumeration Types
+
+define
+   enumeration_type_definition
+seq:
+   "(" 
+   enumeration_literal_list
+   ")"
+end
+
+define
+   enumeration_literal_list
+repeat
+   enumeration_literal_specification
+separator
+   ","
+
+define
+   enumeration_literal_specification 
+oneof: 
+   defining_identifier
+   defining_character_literal
+end
+
+define
+   defining_character_literal
+as
+   character_literal
+
+;---------------------------------------------------------------------------------------------
+; 3.5.4 Integer Types
+
+define
+   integer_type_definition 
+oneof:
+   signed_integer_type_definition
+   modular_type_definition
+end
+
+define
+   signed_integer_type_definition 
+seq:
+   "range" 
+   lower_bound_expression 
+   ".." 
+   upper_bound_expression
+end
+; both bounds must be static
+
+define
+   modular_type_definition
+seq:
+   "mod" 
+   expression
+end
+; expression must be static
+
+;---------------------------------------------------------------------------------------------
+; 3.5.6 Real Types
+
+define
+   real_type_definition 
+oneof:
+   floating_point_definition
+   fixed_point_definition
+end
+
+;---------------------------------------------------------------------------------------------
+; 3.5.7 Floating Point Types
+
+define
+   floating_point_definition 
+seq:
+   "digits" 
+   static_ expression 
+   [real_range_specification]
+end
+
+define
+   real_range_specification
+seq:
+   "range" 
+   lower_bound_expression 
+   ".." 
+   upper_bound_expression
+end
+; both bounds must be static
+
+;---------------------------------------------------------------------------------------------
+; 3.5.9 Fixed Point Types
+
+define
+   fixed_point_definition 
+oneof:
+   ordinary_fixed_point_definition
+   decimal_fixed_point_definition
+end
+
+define
+   ordinary_fixed_point_definition 
+seq:
+   "delta" 
+   expression 
+   real_range_specification
+end
+; expression must be static
+
+define
+   decimal_fixed_point_definition 
+seq:
+   "delta" 
+   delta_expression
+   "digits" 
+   digits_expression 
+   [real_range_specification]
+end
+
+define
+   delta_expression
+as
+   expression
+; expression must be static
+
+define
+   digits_expression
+as
+   expression
+; expression must be static
+
+define
+   digits_constraint
+seq:
+   "digits" 
+   simple_expression 
+   [range_constraint]
+end
+;simple_expression must be static
+
+;---------------------------------------------------------------------------------------------
+; 3.6 Array Types
+
+define
+   array_type_definition
+oneof:
+   unconstrained_array_definition
+   constrained_array_definition
+end
+
+define
+   unconstrained_array_definition
+seq:
+   "array"
+   "("
+   index_subtype_definition_list
+   ")" 
+   "of" 
+   component_definition
+end
+
+define
+   index_subtype_definition_list
+repeat
+   index_subtype_definition
+separator
+   ","
+
+define
+   index_subtype_definition
+seq:
+   subtype_mark 
+   "range"
+   "<>"
+end
+
+define
+   constrained_array_definition
+seq:
+   "array" 
+   "(" 
+   discrete_subtype_definition_list
+   ")" 
+   "of" 
+   component_definition
+end
+
+define
+   discrete_subtype_definition_list
+repeat
+   discrete_subtype_definition
+separator
+   ","
+
+define
+   discrete_subtype_definition
+oneof:
+   discrete_subtype_indication
+   discrete_range
+end
+
+define
+   discrete_subtype_indication
+as
+   subtype_indication
+
+define
+   component_definition
+oneof:
+   aliasable_subtype_indication
+   aliasable_access_definition
+end
+
+define
+   aliasable_subtype_indication
+seq:
+   [aliased_prefix] 
+   subtype_indication
+end
+
+define
+   aliasable_access_definition
+seq:
+   [aliased_prefix] 
+   access_definition
+end
+
+;---------------------------------------------------------------------------------------------
+; 3.6.1 Index Constraints and Discrete Ranges
+
+define
+   index_constraint
+seq:
+   "("
+   discrete_range_list
+   ")"
+end
+
+define
+   discrete_range_list
+repeat
+   discrete_range
+separator
+   ","
+   
+define
+   discrete_range
+oneof:
+   discrete_subtype_indication
+   range
+end
+
+;---------------------------------------------------------------------------------------------
+; 3.7 Discriminants
+
+define
+   discriminant_part
+oneof:
+   unknown_discriminant_part
+   known_discriminant_part
+end
+
+define
+   unknown_discriminant_part
+seq:
+   "("
+   "<>"
+   ")"
+end
+
+define
+   known_discriminant_part
+seq:
+   "("
+   discriminant_specification_list
+   ")"
+end
+
+define
+   discriminant_specification_list
+repeat
+   discriminant_specification
+separator
+   ";"
+
+define
+   discriminant_specification_non_access
+seq:
+   defining_identifier_list 
+   ":" 
+   [null_exclusion]
+   subtype_mark 
+   [default_expression_initialization]
+end
+
+define
+   discriminant_specification_access
+seq:
+   defining_identifier_list 
+   ":" 
+   access_definition 
+   [default_expression_initialization]
+
+define
+   discriminant_specification
+oneof:
+   discriminant_specification_non_access
+   discriminant_specification_access
+end
+
+define
+   default_expression_initialization
+seq:
+   ":=" 
+   default_expression
+end
+
+define
+   default_expression
+as
+   expression
+
+;---------------------------------------------------------------------------------------------
+; 3.7.1 Discriminant Constraints
+
+define
+   discriminant_constraint
+seq:
+   "(" 
+   discriminant_association_list
+   ")"
+end
+
+define 
+   discriminant_association_list
+repeat
+   discriminant_association
+separator
+   ","
+   
+define
+   discriminant_association
+seq:
+   [discriminant_selector_names_prefix]
+   expression
+end
+
+define
+   discriminant_selector_names_prefix
+seq:
+   discriminant_selector_name_list
+   "=>"
+end
+
+define
+   discriminant_selector_name_list
+repeat
+   discriminant_selector_name
+separator
+   "|"
+   
+define
+   discriminant_selector_name
+as
+   selector_name
+   
+;---------------------------------------------------------------------------------------------
+; 3.8 Record Types
+
+define
+   record_type_definition
+seq:
+   [tagged_prefix] 
+   [limited_prefix] 
+   record_definition
+end
+
+define
+   tagged_prefix
+seq:
+   [abstract_prefix] 
+   "tagged"
+end
+
+define
+   abstract_prefix
+as
+   "abstract"
+
+define
+   limited_prefix
+as
+   "limited"
+
+define
+   record_definition
+oneof:
+   record_definition_non_null
+   record_definition_null
+end
+
+define
+   record_definition_non_null
+seq:
+   "record"
+   component_list
+   "end" 
+   "record"
+end
+
+define
+   record_definition_null
+seq:
+   "null" 
+   "record"
+end
+
+define
+   component_list
+oneof:
+   component_item_list
+   component_items_with_variant_part
+   null_component_list
+end
+
+define
+   component_item_list
+repeat
+   component_item
+unseparated
+
+define
+   component_items_with_variant_part
+seq:
+   [component_item_list]
+   variant_part
+end
+
+define
+   null_component_list
+seq:
+   "null"
+   ";"
+end
+
+define
+   component_item
+oneof:
+   component_declaration
+   aspect_clause
+end
+
+define
+   component_declaration
+seq:
+   defining_identifier_list 
+   ":" 
+   component_definition 
+   [default_expression_initialization]
+   [aspect_specification]
+   ";"
+end
+
+;---------------------------------------------------------------------------------------------
+; 3.8.1 Variant Parts and Discrete Choices
+
+define
+   variant_part
+seq:
+   "case" 
+   discriminant_direct_name 
+   "is"
+   variant_list
+   "end" 
+   "case"
+   ";"
+end
+
+define
+   discriminant_direct_name
+as
+   direct_name
+
+define
+   variant_list
+repeat
+   variant
+unseparated
+
+define
+   variant
+seq:
+   "when" 
+   discrete_choice_list 
+   "=>"
+   component_list
+end
+
+define
+   discrete_choice_list
+repeat
+   discrete_choice
+separator
+   "|"
+
+define
+   discrete_choice
+oneof:
+   choice_expression
+   discrete_subtype_indication
+   discrete_range
+   "others"
+end
+
+;---------------------------------------------------------------------------------------------
+; 3.9.1 Type Extensions
+
+define
+   record_extension_part
+seq:
+   "with" 
+   record_definition
+end
+
+;---------------------------------------------------------------------------------------------
+; 3.9.3 Abstract Types and Subprograms
+
+define
+   abstract_subprogram_declaration
+seq:
+   [overriding_indicator]
+   subprogram_specification 
+   "is" 
+   "abstract"
+   [aspect_specification]
+   ";"
+end
+
+;---------------------------------------------------------------------------------------------
+; 3.9.4 Interface Types
+
+define
+   interface_type_definition
+seq:
+   [interface_definition_prefix] 
+   "interface" 
+   [additional_interface_list]
+end
+
+define
+   interface_definition_prefix
+oneof:
+   "limited"
+   "task"
+   "protected"
+   "synchronized"
+end
+
+define
+   additional_interface_list
+seq:
+   "and"
+   interface_list
+end
+
+define
+   interface_list
+repeat
+   interface_subtype_mark
+separator
+   "and"
+   
+define
+   interface_subtype_mark
+as
+   subtype_mark
+
+;---------------------------------------------------------------------------------------------
+; 3.10 Access Types
+
+define
+   access_type_definition
+oneof:
+   access_to_object_definition
+   access_to_subprogram_definition
+end
+; each of these have the null exclusion in them
+
+define
+   access_to_object_definition
+seq:
+   [null_exclusion]
+   "access" 
+   [general_access_modifier] 
+   subtype_indication
+end
+
+define
+   general_access_modifier
+oneof:
+   "all"
+   "constant"
+end
+
+define
+   access_to_subprogram_definition
+oneof:
+   access_to_procedure_definition
+   access_to_function_definition
+end
+; each of these have the null exclusion in them
+
+define
+   access_to_procedure_definition
+seq:
+   [null_exclusion]
+   access_prefix
+   [protected_prefix] 
+   "procedure" 
+   parameter_profile
+end
+
+define
+   protected_prefix
+as
+   "protected"
+
+define
+   access_to_function_definition
+seq:
+   [null_exclusion]
+   access_prefix
+   [protected_prefix] 
+   "function" 
+   parameter_and_result_profile
+end
+
+define
+   null_exclusion
+seq:
+   "not" 
+   "null"
+end
+
+define
+   access_definition
+oneof:
+   object_access_definition
+   access_to_subprogram_definition
+end
+
+define
+   object_access_definition
+seq:
+   [null_exclusion] 
+   "access"
+   [constant_prefix] 
+   subtype_mark
+end
+
+;---------------------------------------------------------------------------------------------
+; 3.10.1 Incomplete Type Declarations
+
+define
+   incomplete_type_declaration
+seq:
+   "type" 
+   defining_identifier 
+   [discriminant_part] 
+   [is_tagged_suffix]
+   ";"
+
+define
+   is_tagged_suffix
+seq:
+   "is"
+   "tagged"
+end
+
+;---------------------------------------------------------------------------------------------
+; 3.11 Declarative Parts
+
+define
+   declarative_part
+repeat
+   declarative_item
+unseparated
+
+define
+   declarative_item
+oneof:
+   basic_declarative_item
+   body
+end
+
+define
+   basic_declarative_item
+oneof:
+   basic_declaration
+   aspect_clause
+   use_clause
+end
+
+define
+   body
+oneof:
+   proper_body
+   body_stub
+end
+
+define
+   proper_body
+oneof:
+   subprogram_body
+   package_body
+   task_body
+   protected_body
+end
+
+;---------------------------------------------------------------------------------------------
+; 4.1 Names
+
+define
+   name
+oneof:
+   direct_name
+   explicit_dereference
+   indexed_component
+   array_slice
+   selected_component
+   attribute_reference
+   type_conversion
+   function_call
+   character_literal
+   qualified_expression
+   generalized_reference
+   generalized_indexing
+end
+
+define
+   direct_name
+oenof:
+   identifier
+   operator_symbol
+end
+
+define
+   prefix
+as
+   name
+
+define
+   explicit_dereference
+seq:
+   name 
+   "."
+   "all"
+end
+
+; implicit_dereference not defined, as it has only pedagogic purpose
+
+;---------------------------------------------------------------------------------------------
+; 4.1.1 Indexed Components
+
+define
+   indexed_component
+seq:
+   prefix 
+   "(" 
+   expression_list
+   ")"
+end
+
+define
+   expression_list
+repeat
+   expression
+separator
+   ","
+
+;---------------------------------------------------------------------------------------------
+; 4.1.2 Slices
+
+define
+   array_slice
+seq:
+   prefix 
+   "(" 
+   discrete_range 
+   ")"
+end
+
+;---------------------------------------------------------------------------------------------
+; 4.1.3 Selected Components
+
+define
+   selected_component
+seq:
+   prefix 
+   "." 
+   selector_name
+end
+
+define
+   selector_name
+oneof:
+   identifier
+   character_literal
+   operator_symbol
+end
+
+;---------------------------------------------------------------------------------------------
+; 4.1.4 Attributes
+
+define
+   attribute_reference
+seq:
+   prefix 
+   "'" 
+   attribute_designator
+end
+
+define
+   attribute_designator
+oneof:
+   non_reserved_word_attribute_designator
+   "access"
+   "delta"
+   "digits"
+   "mod"
+end
+
+define
+   non_reserved_word_attribute_designator
+seq:
+   identifier 
+   [attribute_parametrization]
+end
+
+define
+   attribute_parametrization
+seq:
+   "("
+   expression 
+   ")"
+end
+; expression must be static
+
+define
+   range_attribute_reference
+seq:
+   prefix 
+   "'" 
+   range_attribute_designator
+end
+
+define
+   range_attribute_designator
+seq:
+   "range"
+   [attribute_parametrization]
+end
+
+;---------------------------------------------------------------------------------------------
+; 4.3 Aggregates
+
+define
+   aggregate
+oneof:
+   record_aggregate
+   extension_aggregate
+   array_aggregate
+end
+
+;---------------------------------------------------------------------------------------------
+; 4.3.1 Record Aggregates
+
+define
+   record_aggregate
+seq:
+   "(" 
+   record_component_association_list_or_null
+   ")"
+end
+
+define
+   record_component_association_list_or_null
+oneof:
+   record_component_association_list
+   null record
+end
+
+define
+   record_component_association_list
+repeat
+   record_component_association
+separator
+   ","
+
+define
+   record_component_association
+oneof:
+   record_component_association_expression
+   record_component_association_any
+end
+
+define
+   record_component_association_expression
+seq:
+   [component_choice_list_prefix] 
+   expression
+end
+
+define
+   record_component_association_any
+seq:
+   component_choice_list_prefix 
+   "<>"
+end
+
+define
+   component_choice_list_prefix
+seq:
+   component_choice_list 
+   "=>"
+end
+
+define
+   component_choice_list
+oneof:
+   component_selector_name_list
+   "others"
+end
+
+define
+   component_selector_name_list
+repeat
+   component_selector_name
+separator
+   "|"
+
+define
+   component_selector_name
+as
+   selector_name
+
+;---------------------------------------------------------------------------------------------
+; 4.3.2 Extension Aggregates
+
+define
+   extension_aggregate
+seq:
+   "(" 
+   ancestor_part 
+   "with" 
+   record_component_association_list 
+   ")"
+end
+
+define
+   ancestor_part
+oneof:
+   expression
+   subtype_mark
+end
+
+;---------------------------------------------------------------------------------------------
+; 4.3.3 Array Aggregates
+
+define
+   array_aggregate
+oneof:
+   positional_array_aggregate
+   named_array_aggregate
+end
+
+define
+   positional_array_aggregate
+oneof:
+   positional_array_aggregate_no_others
+   positional_array_aggregate_others
+   positional_array_aggregate_others_any
+end
+
+define
+   positional_array_aggregate_no_others
+seq:
+   "(" 
+   expression , expression_list
+   ")"
+end
+
+define
+   expression_list
+repeat
+   expression
+separator
+   ","
+
+define
+   positional_array_aggregate_others
+seq:
+   "(" 
+   expression_list
+   "," 
+   "others" 
+   "=>" 
+   expression 
+   ")"
+end
+
+define
+   positional_array_aggregate_others_any
+seq:
+   "(" 
+   expression_list
+   "," 
+   "others" 
+   "=>" 
+   "<>"
+   ")"
+end
+
+define
+   named_array_aggregate
+seq:
+   "(" 
+   array_component_association_list
+   ")"
+end
+
+define
+   array_component_association_list
+repeat
+   array_component_association
+separator
+   ","
+
+define
+   array_component_association
+oneof:
+   array_component_association_expression
+   array_component_association_any
+end
+
+define
+   array_component_association_expression
+seq:
+   discrete_choice_list 
+   "=>" 
+   expression
+end
+
+define
+   array_component_association_any
+seq:
+   discrete_choice_list 
+   "=>" 
+   "<>"
+end
+
+;---------------------------------------------------------------------------------------------
+; 4.4 Expressions
+
+define
+   expression
+oneof:
+   conjunction
+   conjunction_shortcut
+   disjunction
+   disjunction_shortcut
+   odd_number_of_trues
+end
+
+define
+   conjunction
+repeat
+   relation
+separator
+   "and"
+   
+define
+   conjunction_shortcut
+repeat
+   relation
+separator
+   and_then
+
+define
+   and_then
+seq:
+   "and"
+   "then"
+end
+
+define
+   disjunction
+repeat
+   relation
+separator
+   "or"
+   
+define
+   disjunction_shortcut
+repeat
+   relation
+separator
+   or_else
+   
+define
+   or_else
+seq:
+   "or"
+   "else"
+end
+
+define
+   odd_number_of_trues
+repeat
+   relation
+separator
+   "xor"
+
+;choice_expression ::=
+;choice_relation {and choice_relation }
+;| choice_relation {or choice_relation }
+;| choice_relation {xor choice_relation }
+;| choice_relation {and then choice_relation }
+;| choice_relation {or else choice_relation }
+
+;choice_relation ::=
+;simple_expression [ relational_operator simple_expression ]
+
+define
+   relation
+oneof:
+   simple_expression
+   relation_expression
+   membership_test
+   raise_expression
+end
+
+define
+   relation_expression
+seq:
+   simple_expression 
+   relational_operator 
+   simple_expression
+end
+
+define
+   membership_test
+seq:
+   tested_simple_expression 
+   [negation] 
+   "in "
+   membership_choice_list
+end
+
+define
+   negation
+as
+   "not"
+
+define
+   membership_choice_list
+repeat
+   membership_choice
+separator
+   "|"
+
+define
+   membership_choice
+oneof:
+   choice_simple_expression 
+   discrete_range
+   subtype_mark
+end
+
+define
+   choice_simple_expression
+as
+   simple_expression
+
+define
+   simple_expression
+seq:
+   [unary_adding_operator] 
+   term_expression
+end
+
+define
+   term_expression
+repeat
+   term
+separator
+   binary_adding_operator
+
+define
+   term
+seq:
+   factor 
+   factor_expression
+end
+   
+define
+   factor_expression
+repeat
+   factor
+sepator
+   multiplying_operator
+
+define
+   factor 
+oneof:
+   primary_expression
+   absolute_value
+   primary_negation
+end
+
+define
+   primary_expression
+oneof:
+   primary
+   exponentiation
+end
+
+define
+   exponentiation
+seq:
+   primary
+   "**"
+   primary
+end
+
+define
+   absolute_value
+seq:
+   "abs"
+   primary
+end
+
+define
+   primary_negation
+seq:
+   "not"
+   primary
+end
+
+define
+   primary
+oneof:
+   numeric_literal
+   nullity 
+   string_literal 
+   aggregate
+   name 
+   allocator
+   parenthesized_expression
+   parenthesized_conditional_expression
+   parenthesized_quantified_expression
+end
+
+define
+   nullity
+as
+   "null"
+
+define
+   parenthesized_expression
+seq:
+   "(" 
+   expression 
+   ")"
+end
+
+define
+   parenthesized_conditional_expression
+seq:
+   "(" 
+   conditional_expression 
+   ")"
+end
+
+define
+   parenthesized_quantified_expression
+seq:
+   "(" 
+   quantified_expression 
+   ")"
+end
+
+define
+   tested_simple_expression
+as
+   simple_expression
+
+;---------------------------------------------------------------------------------------------
+; 4.5 Operators and Expression Evaluation
+
+logical_operator ::= and | or | xor
+
+relational_operator ::= = | /= | < | <= | > | >=
+
+binary_adding_operator ::= + | – | &
+
+unary_adding_operator ::= + | –
+
+multiplying_operator ::= * | / | mod | rem
+
+highest_precedence_operator ::= ** | abs | not
+
+;---------------------------------------------------------------------------------------------
+; 4.5.7 Conditional Expressions
+
+conditional_expression ::= if_expression | case_expression
+
+if_expression ::=
+if condition then dependent_ expression
+{elsif condition then dependent_ expression }
+[else dependent_ expression ]
+
+condition ::= boolean_ expression
+
+case_expression ::=
+case selecting_ expression is
+case_expression_alternative {,
+case_expression_alternative }
+
+case_expression_alternative ::=
+when discrete_choice_list =>
+dependent_ expression
+
+;---------------------------------------------------------------------------------------------
+; 4.5.8 Quantified Expressions
+
+quantified_expression ::= for quantifier loop_parameter_specification => predicate
+| for quantifier iterator_specification => predicate
+
+quantifier ::= all | some
+
+predicate ::= boolean_ expression
+
+;---------------------------------------------------------------------------------------------
+; 4.6 Type Conversions
+
+type_conversion ::=
+subtype_mark ( expression )
+| subtype_mark ( name )
+
+;---------------------------------------------------------------------------------------------
+; 4.7 Qualified Expressions
+
+qualified_expression ::=
+subtype_mark '( expression ) | subtype_mark ' aggregate
+
+;---------------------------------------------------------------------------------------------
+; 4.8 Allocators
+
+allocator ::=
+new [ subpool_specification ] subtype_indication
+| new [ subpool_specification ] qualified_expression
+
+subpool_specification ::= ( subpool_handle_name )
+
+define
+   subpool_handle_name
+as
+   name
+
+;---------------------------------------------------------------------------------------------
+; 5.1 Simple and Compound Statements - Sequences of Statements
+
+sequence_of_statements ::= statement { statement } { label }
+
+statement ::=
+{ label } simple_statement | { label } compound_statement
+
+simple_statement ::= null_statement
+| assignment_statement | exit_statement
+| goto_statement | procedure_call_statement
+| simple_return_statement | entry_call_statement
+| requeue_statement | delay_statement
+| abort_statement | raise_statement
+| code_statement
+
+compound_statement ::=
+if_statement | case_statement
+| loop_statement | block_statement
+| extended_return_statement
+| accept_statement | select_statement
+
+null_statement ::= null;
+
+label ::= <<label_ statement_identifier >>
+
+statement_identifier ::= direct_name
+
+;---------------------------------------------------------------------------------------------
+; 5.2 Assignment Statements
+
+define
+   assignment_statement
+seq:
+   variable_name 
+   ":=" 
+   expression 
+end
+
+define
+   variable_name
+as
+   name
+
+;---------------------------------------------------------------------------------------------
+; 5.3 If Statements
+
+define
+   if_statement
+seq:
+   "if" 
+   condition 
+   "then"
+   sequence_of_statements
+   [elsif_parts]
+   [else_part]
+   "end" 
+   "if"
+   ";"
+end
+
+define
+   elsif_parts
+repeat
+   elsif_part
+unseparated
+
+define
+   elseif_part
+seq:
+   "elsif"
+   condition 
+   "then"
+   sequence_of_statements
+end
+
+define
+   else_part
+seq:
+   "else"
+   sequence_of_statements
+end
+
+;---------------------------------------------------------------------------------------------
+; 5.4 Case Statements
+
+case_statement ::=
+case selecting_ expression is
+case_statement_alternative
+{ case_statement_alternative }
+end case;
+
+case_statement_alternative ::=
+when discrete_choice_list =>
+sequence_of_statements
+
+;---------------------------------------------------------------------------------------------
+; 5.5 Loop Statements
+
+loop_statement ::=
+[loop_ statement_identifier :]
+[ iteration_scheme ] loop
+sequence_of_statements
+end loop [loop_ identifier ];
+
+iteration_scheme ::= while condition
+| for loop_parameter_specification
+| for iterator_specification
+
+loop_parameter_specification ::=
+defining_identifier in [reverse] discrete_subtype_definition
+
+;---------------------------------------------------------------------------------------------
+; 5.5.2 Generalized Loop Iteration
+
+iterator_specification ::=
+defining_identifier in [reverse] iterator_ name
+| defining_identifier [: subtype_indication ] of [reverse] iterable_ name
+
+;---------------------------------------------------------------------------------------------
+; 5.6 Block Statements
+
+define
+   block_statement
+seq:
+   [block_statement_identifier_prefix]
+   [declarative_part_prefix]
+   "begin"
+   handled_sequence_of_statements
+   "end" 
+   [block_identifier]
+
+define
+   block_statement_identifier_prefix
+seq:
+   block_statement_identifier 
+   ":"
+end
+
+define
+   block_statement_identifier
+as
+   statement_identifier
+
+define
+   declarative_part_prefix
+seq:
+   "declare"
+   declarative_part 
+end
+
+define
+   block_identifier
+as
+   identifier
+
+;---------------------------------------------------------------------------------------------
+; 5.7 Exit Statements
+
+define
+   exit_statement
+seq:
+   "exit" 
+   [loop_name] 
+   [exit_statement_condition_phrase]
+   ";"
+end
+
+define
+   exit_statement_condition_phrase
+seq:
+   "when"
+   condition
+end
+
+define
+   loop_name
+as
+   name
+
+;---------------------------------------------------------------------------------------------
+; 5.8 Goto Statements
+
+define
+   goto_statement
+seq:
+   "goto" 
+   label_name
+   ";"
+end
+
+define
+   label_name
+as
+   name
+
+;---------------------------------------------------------------------------------------------
+; 6.1 Subprogram Declarations
+
+subprogram_declaration ::=
+[ overriding_indicator ]
+subprogram_specification
+[ aspect_specification ];
+
+subprogram_specification ::=
+procedure_specification
+| function_specification
+
+procedure_specification ::= procedure defining_program_unit_name parameter_profile
+
+function_specification ::= function defining_designator parameter_and_result_profile
+
+designator ::= [ parent_unit_name . ] identifier | operator_symbol
+
+defining_designator ::= defining_program_unit_name | defining_operator_symbol
+
+defining_program_unit_name ::= [ parent_unit_name . ] defining_identifier
+
+; The optional parent_unit_name is only allowed for library units (see 10.1.1).
+
+operator_symbol ::= string_literal
+
+defining_operator_symbol ::= operator_symbol
+
+parameter_profile ::= [ formal_part ]
+
+parameter_and_result_profile ::=
+[ formal_part ] return [ null_exclusion ] subtype_mark
+| [ formal_part ] return access_definition
+
+formal_part ::=
+( parameter_specification {; parameter_specification })
+
+parameter_specification ::=
+defining_identifier_list : [aliased] mode [ null_exclusion ] subtype_mark [:= default_expression ]
+| defining_identifier_list : access_definition [:= default_expression ]
+
+mode ::= [in] | in out | out
+
+;---------------------------------------------------------------------------------------------
+; 6.3 Subprogram Bodies
+
+subprogram_body ::=
+[ overriding_indicator ]
+subprogram_specification
+[ aspect_specification ] is
+declarative_part
+begin
+handled_sequence_of_statements
+end [ designator ];
+
+;---------------------------------------------------------------------------------------------
+; 6.4 Subprogram Calls
+
+procedure_call_statement ::=
+procedure_ name ;
+| procedure_ prefix actual_parameter_part ;
+
+function_call ::=
+function_ name
+| function_ prefix actual_parameter_part
+
+actual_parameter_part ::=
+( parameter_association {, parameter_association })
+
+parameter_association ::=
+[formal_parameter_ selector_name =>] explicit_actual_parameter
+explicit_actual_parameter ::= expression | variable_ name
+
+;---------------------------------------------------------------------------------------------
+; 6.5 Return Statements
+
+simple_return_statement ::= return [ expression ];
+
+extended_return_object_declaration ::=
+defining_identifier : [aliased][constant] return_subtype_indication [:= expression ]
+
+extended_return_statement ::=
+return extended_return_object_declaration [do
+handled_sequence_of_statements
+end return];
+
+return_subtype_indication ::= subtype_indication | access_definition
+
+;---------------------------------------------------------------------------------------------
+; 6.7 Null Procedures
+
+null_procedure_declaration ::=
+[ overriding_indicator ]
+procedure_specification is null
+[ aspect_specification ];
+
+;---------------------------------------------------------------------------------------------
+; 6.8 Expression Functions
+
+define
+   expression_function_declaration
+seq:
+   [overriding_indicator]
+   function_specification 
+   "is"
+   expression_or_aggregate
+   [aspect_specification]
+   ";"
+end
+
+define
+   expression_or_aggregate
+oneof:
+   parenthesised_expression
+   aggregate
+end
+
+define 
+   parenthesised_expression
+seq:
+   "(" 
+   expression 
+   ")"
+end
+
+;---------------------------------------------------------------------------------------------
+; 7.1 Package Specifications and Declarations
+
+define
+   package_declaration
+seq:
+   package_specification 
+   ";"
+end
+
+define
+   package_specification
+seq:
+   package 
+   defining_program_unit_name
+   [ aspect_specification ] 
+   is
+   { basic_declarative_item }
+   [private   { basic_declarative_item }]
+   end 
+   [[ parent_unit_name .] identifier ]
+
+;---------------------------------------------------------------------------------------------
+; 7.2 Package Bodies
+
+package_body ::=
+package body defining_program_unit_name
+[ aspect_specification ] is
+declarative_part
+[begin
+handled_sequence_of_statements ]
+end [[ parent_unit_name .] identifier ];
+
+;---------------------------------------------------------------------------------------------
+; 7.3 Private Types and Private Extensions
+
+private_type_declaration ::=
+type defining_identifier [ discriminant_part ] is [[abstract] tagged] [limited] private
+[ aspect_specification ];
+
+private_extension_declaration ::=
+type defining_identifier [ discriminant_part ] is
+[abstract] [limited | synchronized] new ancestor_ subtype_indication
+[and interface_list ] with private
+[ aspect_specification ];
+
+;---------------------------------------------------------------------------------------------
+; 8.3.1 Overriding Indicators
+
+overriding_indicator ::= [not] overriding
+
+;---------------------------------------------------------------------------------------------
+; 8.4 Use Clauses
+
+use_clause ::= use_package_clause | use_type_clause
+
+use_package_clause ::= use package_ name {, package_ name };
+
+use_type_clause ::= use [all] type subtype_mark {, subtype_mark };
+
+;---------------------------------------------------------------------------------------------
+; 8.5 Renaming Declarations
+
+renaming_declaration ::=
+object_renaming_declaration
+| exception_renaming_declaration
+| package_renaming_declaration
+| subprogram_renaming_declaration
+| generic_renaming_declaration
+
+;---------------------------------------------------------------------------------------------
+; 8.5.1 Object Renaming Declarations
+
+object_renaming_declaration ::=
+defining_identifier : [ null_exclusion ] subtype_mark renames object_ name
+[ aspect_specification ];
+| defining_identifier : access_definition renames object_ name
+[ aspect_specification ];
+
+;---------------------------------------------------------------------------------------------
+; 8.5.2 Exception Renaming Declarations
+
+exception_renaming_declaration ::= defining_identifier : exception renames exception_ name
+[ aspect_specification ];
+
+;---------------------------------------------------------------------------------------------
+; 8.5.3 Package Renaming Declarations
+
+package_renaming_declaration ::=
+package defining_program_unit_name renames package_ name
+[ aspect_specification ];
+
+;---------------------------------------------------------------------------------------------
+; 8.5.4 Subprogram Renaming Declarations
+
+subprogram_renaming_declaration ::=
+[ overriding_indicator ]
+subprogram_specification renames callable_entity_ name
+[ aspect_specification ];
+
+;---------------------------------------------------------------------------------------------
+; 8.5.5 Generic Renaming Declarations
+
+generic_renaming_declaration ::=
+generic package defining_program_unit_name renames generic_package_ name
+[ aspect_specification ];
+| generic procedure defining_program_unit_name renames generic_procedure_ name
+[ aspect_specification ];
+| generic function defining_program_unit_name renames generic_function_ name
+[ aspect_specification ];
+
+;---------------------------------------------------------------------------------------------
+; 9.1 Task Units and Task Objects
+
+task_type_declaration ::=
+task type defining_identifier [ known_discriminant_part ]
+[ aspect_specification ] [is
+[new interface_list with]
+task_definition ];
+
+single_task_declaration ::=
+task defining_identifier
+[ aspect_specification ][is
+[new interface_list with]
+task_definition ];
+
+task_definition ::=
+{ task_item }
+[ private
+{ task_item }]
+end [task_ identifier ]
+
+task_item ::= entry_declaration | aspect_clause
+
+task_body ::=
+task body defining_identifier
+[ aspect_specification ] is
+declarative_part
+begin
+handled_sequence_of_statements
+end [task_ identifier ];
+
+;---------------------------------------------------------------------------------------------
+; 9.4 Protected Units and Protected Objects
+
+protected_type_declaration ::=
+protected type defining_identifier [ known_discriminant_part ]
+[ aspect_specification ] is
+[new interface_list with]
+protected_definition ;
+
+single_protected_declaration ::=
+protected defining_identifier
+[ aspect_specification ] is
+[new interface_list with]
+protected_definition ;
+
+protected_definition ::=
+{ protected_operation_declaration }
+[ private
+{ protected_element_declaration } ]
+end [protected_ identifier ]
+
+protected_operation_declaration ::= subprogram_declaration
+| entry_declaration
+| aspect_clause
+
+protected_element_declaration ::= protected_operation_declaration
+| component_declaration
+
+protected_body ::=
+protected body defining_identifier
+[ aspect_specification ] is
+{ protected_operation_item }
+end [protected_ identifier ];
+
+protected_operation_item ::= subprogram_declaration
+| subprogram_body
+| null_procedure_declaration
+| expression_function_declaration
+| entry_body
+| aspect_clause
+
+;---------------------------------------------------------------------------------------------
+; 9.5 Intertask Communication
+
+synchronization_kind ::= By_Entry | By_Protected_Procedure | Optional
+
+;---------------------------------------------------------------------------------------------
+; 9.5.2 Entries and Accept Statements
+
+entry_declaration ::=
+[ overriding_indicator ]
+entry defining_identifier [( discrete_subtype_definition )] parameter_profile
+[ aspect_specification ];
+
+accept_statement ::=
+accept entry_ direct_name [( entry_index )] parameter_profile [do
+handled_sequence_of_statements
+end [entry_ identifier ]];
+
+entry_index ::= expression
+
+entry_body ::=
+entry defining_identifier entry_body_formal_part entry_barrier is
+declarative_part
+begin
+handled_sequence_of_statements
+end [entry_ identifier ];
+
+entry_body_formal_part ::= [( entry_index_specification )] parameter_profile
+
+entry_barrier ::= when condition
+
+entry_index_specification ::= for defining_identifier in discrete_subtype_definition
+
+;---------------------------------------------------------------------------------------------
+; 9.5.3 Entry Calls
+
+entry_call_statement ::= entry_ name [ actual_parameter_part ];
+
+;---------------------------------------------------------------------------------------------
+; 9.5.4 Requeue Statements
+
+requeue_statement ::= requeue procedure_or_entry_ name [with abort];
+
+;---------------------------------------------------------------------------------------------
+; 9.6 Delay Statements, Duration, and Time
+
+delay_statement ::= delay_until_statement | delay_relative_statement
+delay_until_statement ::= delay until delay_ expression ;
+delay_relative_statement ::= delay delay_ expression ;
+
+define
+   delay_expression
+as
+   expression
+
+;---------------------------------------------------------------------------------------------
+; 9.7 Select Statements
+
+select_statement ::=
+selective_accept
+| timed_entry_call
+| conditional_entry_call
+| asynchronous_select
+
+;---------------------------------------------------------------------------------------------
+; 9.7.1 Selective Accept
+
+selective_accept ::=
+select
+[ guard ]
+select_alternative
+{ or
+[ guard ]
+select_alternative }
+[ else
+sequence_of_statements ]
+end select;
+
+guard ::= when condition =>
+
+select_alternative ::=
+accept_alternative
+| delay_alternative
+| terminate_alternative
+
+accept_alternative ::=
+accept_statement [ sequence_of_statements ]
+
+delay_alternative ::=
+delay_statement [ sequence_of_statements ]
+
+terminate_alternative ::= terminate;
+
+;---------------------------------------------------------------------------------------------
+; 9.7.2 Timed Entry Calls
+
+timed_entry_call ::=
+select
+entry_call_alternative
+or
+delay_alternative
+end select;
+
+entry_call_alternative ::=
+procedure_or_entry_call [ sequence_of_statements ]
+
+procedure_or_entry_call ::=
+procedure_call_statement | entry_call_statement
+
+;---------------------------------------------------------------------------------------------
+; 9.7.3 Conditional Entry Calls
+
+conditional_entry_call ::=
+select
+entry_call_alternative
+else
+sequence_of_statements
+end select;
+
+;---------------------------------------------------------------------------------------------
+; 9.7.4 Asynchronous Transfer of Control
+
+asynchronous_select ::=
+select
+triggering_alternative
+then abort
+abortable_part
+end select;
+
+triggering_alternative ::= triggering_statement [ sequence_of_statements ]
+
+triggering_statement ::= procedure_or_entry_call | delay_statement
+
+abortable_part ::= sequence_of_statements
+
+;---------------------------------------------------------------------------------------------
+; 9.8 Abort of a Task - Abort of a Sequence of Statements
+
+abort_statement ::= abort task_ name {, task_ name };
+
+;---------------------------------------------------------------------------------------------
+; 10.1.1 Compilation Units - Library Units
+
+compilation ::= { compilation_unit }
+
+compilation_unit ::=
+context_clause library_item
+| context_clause subunit
+
+library_item ::= [private] library_unit_declaration
+| library_unit_body
+| [private] library_unit_renaming_declaration
+
+library_unit_declaration ::=
+subprogram_declaration | package_declaration
+| generic_declaration | generic_instantiation
+
+library_unit_renaming_declaration ::=
+package_renaming_declaration
+| generic_renaming_declaration
+| subprogram_renaming_declaration
+
+library_unit_body ::= subprogram_body | package_body
+
+parent_unit_name ::= name
+
+;---------------------------------------------------------------------------------------------
+; 10.1.2 Context Clauses - With Clauses
+
+context_clause ::= { context_item }
+
+context_item ::= with_clause | use_clause
+
+with_clause ::= limited_with_clause | nonlimited_with_clause
+
+limited_with_clause ::= limited [private] with library_unit_ name {, library_unit_ name };
+
+nonlimited_with_clause ::= [private] with library_unit_ name {, library_unit_ name };
+
+;---------------------------------------------------------------------------------------------
+; 10.1.3 Subunits of Compilation Units
+
+body_stub ::=
+subprogram_body_stub | package_body_stub | task_body_stub | protected_body_stub
+
+subprogram_body_stub ::=
+[ overriding_indicator ]
+subprogram_specification is separate
+[ aspect_specification ];
+
+package_body_stub ::=
+package body defining_identifier is separate
+[ aspect_specification ];
+
+task_body_stub ::=
+task body defining_identifier is separate
+[ aspect_specification ];
+
+protected_body_stub ::=
+protected body defining_identifier is separate
+[ aspect_specification ];
+
+subunit ::= separate ( parent_unit_name ) proper_body
+
+;---------------------------------------------------------------------------------------------
+; 11.1 Exception Declarations
+
+exception_declaration ::= defining_identifier_list : exception
+[ aspect_specification ];
+
+;---------------------------------------------------------------------------------------------
+; 11.2 Exception Handlers
+
+handled_sequence_of_statements ::=
+sequence_of_statements
+[exception
+exception_handler
+{ exception_handler }]
+
+exception_handler ::=
+when [ choice_parameter_specification :] exception_choice {| exception_choice } =>
+sequence_of_statements
+
+choice_parameter_specification ::= defining_identifier
+
+exception_choice ::= exception_ name | others
+
+;---------------------------------------------------------------------------------------------
+; 11.3 Raise Statements and Raise Expressions
+
+raise_statement ::= raise;
+| raise exception_ name [with string_ expression ];
+
+raise_expression ::= raise exception_ name [with string_ simple_expression ]
+
+;---------------------------------------------------------------------------------------------
+; 12.1 Generic Declarations
+
+generic_declaration ::= generic_subprogram_declaration | generic_package_declaration
+
+generic_subprogram_declaration ::=
+generic_formal_part subprogram_specification
+[ aspect_specification ];
+
+generic_package_declaration ::=
+generic_formal_part package_specification ;
+
+generic_formal_part ::= generic { generic_formal_parameter_declaration | use_clause }
+
+generic_formal_parameter_declaration ::=
+formal_object_declaration
+| formal_type_declaration
+| formal_subprogram_declaration
+| formal_package_declaration
+
+;---------------------------------------------------------------------------------------------
+; 12.3 Generic Instantiation
+
+generic_instantiation ::=
+package defining_program_unit_name is
+new generic_package_ name [ generic_actual_part ]
+[ aspect_specification ];
+| [ overriding_indicator ]
+procedure defining_program_unit_name is
+new generic_procedure_ name [ generic_actual_part ]
+[ aspect_specification ];
+| [ overriding_indicator ]
+function defining_designator is
+new generic_function_ name [ generic_actual_part ]
+[ aspect_specification ];
+
+generic_actual_part ::=
+( generic_association {, generic_association })
+
+generic_association ::=
+[generic_formal_parameter_ selector_name =>] explicit_generic_actual_parameter
+
+explicit_generic_actual_parameter ::= expression | variable_ name
+| subprogram_ name | entry_ name | subtype_mark
+| package_instance_ name
+
+;---------------------------------------------------------------------------------------------
+; 12.4 Formal Objects
+
+formal_object_declaration ::=
+defining_identifier_list : mode [ null_exclusion ] subtype_mark [:= default_expression ]
+[ aspect_specification ];
+| defining_identifier_list : mode access_definition [:= default_expression ]
+[ aspect_specification ];
+
+;---------------------------------------------------------------------------------------------
+; 12.5 Formal Types
+
+formal_type_declaration ::=
+formal_complete_type_declaration
+| formal_incomplete_type_declaration
+
+formal_complete_type_declaration ::=
+type defining_identifier [ discriminant_part ] is formal_type_definition
+[ aspect_specification ];
+
+formal_incomplete_type_declaration ::=
+type defining_identifier [ discriminant_part ] [is tagged];
+
+formal_type_definition ::=
+formal_private_type_definition
+| formal_derived_type_definition
+| formal_discrete_type_definition
+| formal_signed_integer_type_definition
+| formal_modular_type_definition
+| formal_floating_point_definition
+| formal_ordinary_fixed_point_definition
+| formal_decimal_fixed_point_definition
+| formal_array_type_definition
+| formal_access_type_definition
+| formal_interface_type_definition
+
+;---------------------------------------------------------------------------------------------
+; 12.5.1 Formal Private and Derived Types
+
+formal_private_type_definition ::= [[abstract] tagged] [limited] private
+
+formal_derived_type_definition ::=
+[abstract] [limited | synchronized] new subtype_mark [[and interface_list ]with private]
+
+;---------------------------------------------------------------------------------------------
+; 12.5.2 Formal Scalar Types
+
+formal_discrete_type_definition ::= (<>)
+
+formal_signed_integer_type_definition ::= range <>
+
+formal_modular_type_definition ::= mod <>
+
+formal_floating_point_definition ::= digits <>
+
+formal_ordinary_fixed_point_definition ::= delta <>
+
+formal_decimal_fixed_point_definition ::= delta <> digits <>
+
+;---------------------------------------------------------------------------------------------
+; 12.5.3 Formal Array Types
+
+formal_array_type_definition ::= array_type_definition
+
+;---------------------------------------------------------------------------------------------
+; 12.5.4 Formal Access Types
+
+formal_access_type_definition ::= access_type_definition
+
+;---------------------------------------------------------------------------------------------
+; 12.5.5 Formal Interface Types
+
+formal_interface_type_definition ::= interface_type_definition
+
+;---------------------------------------------------------------------------------------------
+; 12.6 Formal Subprograms
+
+formal_subprogram_declaration ::= formal_concrete_subprogram_declaration
+| formal_abstract_subprogram_declaration
+
+formal_concrete_subprogram_declaration ::=
+with subprogram_specification [is subprogram_default ]
+[ aspect_specification ];
+
+formal_abstract_subprogram_declaration ::=
+with subprogram_specification is abstract [ subprogram_default ]
+[ aspect_specification ];
+
+subprogram_default ::= default_name | <> | null
+
+default_name ::= name
+
+;---------------------------------------------------------------------------------------------
+; 12.7 Formal Packages
+
+formal_package_declaration ::=
+with package defining_identifier is new generic_package_ name formal_package_actual_part
+[ aspect_specification ];
+
+formal_package_actual_part ::=
+([others =>] <>)
+| [ generic_actual_part ]
+| ( formal_package_association {, formal_package_association } [, others => <>])
+
+formal_package_association ::=
+generic_association
+| generic_formal_parameter_ selector_name => <>
+
+;---------------------------------------------------------------------------------------------
+; 13.1 Operational and Representation Aspects
+
+aspect_clause ::= attribute_definition_clause
+| enumeration_representation_clause
+| record_representation_clause
+| at_clause
+
+local_name ::= direct_name
+| direct_name ' attribute_designator
+| library_unit_ name
+
+;---------------------------------------------------------------------------------------------
+; 13.1.1 Aspect Specifications
+
+aspect_specification ::=
+with aspect_mark [=> aspect_definition ] {,
+aspect_mark [=> aspect_definition ] }
+
+aspect_mark ::= aspect_ identifier ['Class]
+
+aspect_definition ::= name | expression | identifier
+
+;---------------------------------------------------------------------------------------------
+; 13.3 Operational and Representation Attributes
+
+attribute_definition_clause ::=
+for local_name ' attribute_designator use expression ;
+| for local_name ' attribute_designator use name ;
+
+;---------------------------------------------------------------------------------------------
+; 13.4 Enumeration Representation Clauses
+
+enumeration_representation_clause ::=
+for first_subtype_ local_name use enumeration_aggregate ;
+
+enumeration_aggregate ::= array_aggregate
+
+;---------------------------------------------------------------------------------------------
+; 13.5.1 Record Representation Clauses
+
+record_representation_clause ::=
+for first_subtype_ local_name use
+record [ mod_clause ]
+{ component_clause }
+end record;
+
+component_clause ::=
+component_ local_name at position range first_bit .. last_bit ;
+
+position ::= static_ expression
+
+first_bit ::= static_ simple_expression
+
+last_bit ::= static_ simple_expression
+
+;---------------------------------------------------------------------------------------------
+; 13.8 Machine Code Insertions
+
+code_statement ::= qualified_expression ;
+
+;---------------------------------------------------------------------------------------------
+; End of Ada 2012 syntax
+
