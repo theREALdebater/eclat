@@ -12,24 +12,24 @@ is
 
 --/ Startpoints:
 
-   type Program_Assembly is abstract limited new System_Object with private;
+   type Program_Partition is abstract limited new System_Object with private;
 
-   type Assembly_Access is access all Program_Assembly'Class;
+   type Partition_Access is access all Program_Partition'Class;
 
---| A _program assembly_ is roughly equivalent to a tradtional executable (file or program). 
+--| A _program partition_ is roughly equivalent to a tradtional executable (file or program). 
 
-   function Name (Program: not null access Program_Assembly) return Wide_String is abstract;
+   function Name (Program: not null access Program_Partition) return Wide_String is abstract;
 
 --| The function `Name` returns the full name of a program startpoint, which should (as far as is
 --| practicable) uniquely identify the startpoint (to a human). It should include the startpoint's
 --| version (but not its revision). this name is not intended to be the file name of the 
 --| ?????.
 
-   ????? function Form (Program: not null access Program_Assembly) return Wide_String is abstract;
+   ????? function Form (Program: not null access Program_Partition) return Wide_String is abstract;
 
-   ????? function UMID (Program: not null access Program_Assembly) return Wide_String is abstract;
+   ????? function UMID (Program: not null access Program_Partition) return Wide_String is abstract;
 
-   function Description (Program: not null access Program_Assembly) return Wide_String is abstract;
+   function Description (Program: not null access Program_Partition) return Wide_String is abstract;
    
 --| ?????
 
@@ -51,7 +51,7 @@ is
 
    function Startpoint (Instance: access Executable_Instance) 
       return 
-         Assembly_Access is abstract;
+         Partition_Access is abstract;
 
 --| The function `Startpoint` returns a remote access value referencing the program startpoint that 
 --| the instance is an execution of. 
@@ -124,7 +124,7 @@ is
 --| 
 --| This parent-child relationship between instances creates a hierarchy (tree). 
 
-   function Spawn (Startpoint: in out Program_Assembly;
+   function Spawn (Startpoint: in out Program_Partition;
                    Parent:   in     Instance_Access := null) 
       return 
          Instance_Access is abstract;

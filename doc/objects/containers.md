@@ -158,7 +158,7 @@ The function `Find` is a primitive operation of the type `Object_Container`:
 function Find (Container: not null access Object_Container;
                OID:       in Object_Identifier) 
    return 
-      Object_Access is abstract;
+      Object_Access'Class is abstract;
 ```
 
 The function `Find` returns (an access value referencing) the system object that has the given
@@ -240,7 +240,7 @@ member object.
 function Find (Container: not null access Object_Directory; 
                Name:      in  Path_String) -- simple name
 return 
-   access System_Object is abstract; 
+   access System_Object'Class is abstract; 
 ```
 
 The `Name` passed into this function must be a simple name, not a [path](paths.md). This

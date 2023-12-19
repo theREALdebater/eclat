@@ -1,9 +1,9 @@
 -----------------------------------------------------------------------------------------------
 # Specification of Name Garnering {#song}
 
-The software accompanying ECLAT implements [file](../rts/files.md) I/O in a very flexible manner, 
-based on [services](../services/services.md) of a special kind, called General Resource Name 
-Resolvers, or GRNRs, pronounced [garnerers](../services/garnerers.md). 
+AdaOS implements [file](../rts/files.md) I/O in a very flexible manner, based on
+[services](../services/services.md) of a special kind, called General Resource Name Resolvers,
+or GRNRs, pronounced [garnerers](../services/garnerers.md). 
 
 The ECLAT implementations of the [Ada Standard Library](../adalib/adalib.md) and [C Standard
 Library](../clib/clib.md) make use of this mechanism to allow files to be created and opened by
@@ -112,7 +112,7 @@ The mode of a SONG can be [configured](../intro/config.md) as follows:
 
 where `S` is the name of the SONG. 
 
-The `position` attribute must have the value `start` or `end` and the `auto-create` attribute
+The `position` property must have the value `start` or `end` and the `auto-create` property
 must have the value `false` or `true`. 
 
 

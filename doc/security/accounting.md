@@ -10,9 +10,9 @@ _Accounting_ is based on the principle that a [principal](security.md#princ) sho
 some sense---for the amount of every system resource used up by programs executing on their 
 behalf. 
 
-The 'money' which principals use to pay for resources may be some real-life currency, or it may 
-be some arbitrary accounting unit. How any such payments are requested or made is not dealt 
-with here, neither is the question of exchange between currencies. 
+The 'money' which principals use to pay for resources may be some real-life currency, or it may
+be some arbitrary accounting unit. How any such payments are requested or settled is not dealt
+with here, neither is the question of exchange between currencies (real or imagined). 
 
 _Limiting_ is the enforcement of an upper limit on the amount of each resource a principal's 
 programs are collectively permitted to use up. 

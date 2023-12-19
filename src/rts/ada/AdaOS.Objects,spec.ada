@@ -765,10 +765,10 @@ private
       is
       begin
          Engaged := True;
-         Compartment := Task_Assembly.Value(Engage'Caller).Compartment;
-         Authority := Task_Authority.Value(Engage'Caller);
+         Compartment := Task_Partition(Engage'Caller).Compartment;
+         Authority := Task_Authority(Engage'Caller);
 
-         if not Task_Assembly.Value.Compartment.Ambit.Contains(Authority)
+         if not Task_Partition.Compartment.Ambit.Contains(Authority)
          then
             Disengage;
             raise ?????;

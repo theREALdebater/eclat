@@ -7,32 +7,33 @@ and transport the data.
 
 This model can be---and should be---used as the basis of [messaging](messaging.md) mechanisms. 
 
-.....
-
-..... security .....
-
 
 
 -----------------------------------------------------------------------------------------------
 ## Event Objects                                                                         {#obj}
 
-An _event_ is a plain object (usually of a record type that is not limited or synchronised, not
-remote) which contains information pertaining to something happening in a program that other
-programs may be (or perhaps will certainly be) interested in. 
+An _event_ is a plain object (usually of a record type that is not synchronised, not remote,
+not limited and can be plainly copied and compared) which contains information pertaining to
+something happening in a program that other programs may be (or perhaps will certainly be)
+interested in. 
 
-Every event type is derived from the abstract limited tagged private type `Event_Object` which
-is declared in the package `AdaOS.Events`. 
+Every event type is derived from the abstract tagged private type `Event_Object` which is
+declared in the package `AdaOS.Events`. 
 
 All event objects must be serialisable .....
 
 .....
 
 
-### `mkevlib`
+-----------------------------------------------------------------------------------------------
+## Event Libraries                                                                     {#evlib}
 
-The command-line tool [`mkevlib`](../tools/mkevlib.md) can be used to generate an ECLAT support library that contains
-declarations of event types, as well as procedures that can be used by ????? to manipulate
+The command-line tool [`mkevlib`](../tools/mkevlib.md) can be used to generate an _event
+library_, which is a [contributory library](../eclat/building.md#contlib) that contains
+declarations of event types, as well as utility procedures that can be used to manipulate the
 event data in various ways. 
+
+.....
 
 
 
@@ -46,16 +47,30 @@ interface `AdaOS.Objects.System_Object`).
 
 A program can _send_ events into an event channel and _receive_ events out of an event channel,
 via [sender and receiver](#send) objects. Event objects are of value (non-limited) types. When
-they are sent or received, it is *copies* of the event objects that are transferred, even if
-pointers (access values) are used to do it in a more efficient way. 
+they are sent or received, it is the *value* of an event object that is transferred, even if a
+pointer (an access value to a constant value) that is used to do it in a more efficient way. 
 
-Event channels form a [hierarchy](../intro/hier.md), totally different to the Ada type
-hierarchy or any other class hierarchy. An event channel can have a super event channel, or it
-can have no super event channel. If an event channel has no super event channel, it will be
-(one of potentially many) at the top of the hierarchy. 
+Event channels form a [hierarchy](../intro/hier.md). An event channel can have a super-channel,
+or it can have no super-channel. If an event channel has no super-channel, it will be (one of
+potentially many) at the top of the hierarchy. If it has a super-channel, that super-channel
+must be in the same [broker](#brok). 
 
 If an event is sent to an event channel with superior event channels, a duplicate of the event
 is also (effectively) sent to all the superior event channels. 
+
+A channel will have a name if its broker is a [directory](../objects/containers.md#dir). In
+this case, there is a convention for the naming of channels: 
+
+ * Channel names are [universal](../intro/names.md#univ); 
+
+ * .....
+
+Because it is a system object, an event channel is also a
+[secure object](../security/security.md#secobj). It must be engaged to be used, and a security
+policy can be applied to it, to either allow or disallow a particular authority to call its
+methods. 
+
+It is the responsibility of the channel's [broker](#brok) to enforce security.
 
 
 
@@ -193,16 +208,16 @@ is not strictly required).
 ## Unicast and Multicast
 
 When an [event channel](#chan) is created, it has a property that can be set called its
-_picking limit_. This limit is intended to be the maximum number of receivers that can receive
+_picking limit_. This limit is intended to be the maximum number of receivers that can receive
 (a copy of) any one event sent to the channel. 
 
-The picking limit of any channel which has a parent is not permitted to be
-greater than that of its parent (if its parent has a non-zero picking limit). The picking limit
-of a channel cannot be changed. 
+The picking limit of any channel which has a parent is not permitted to be greater than that of
+its parent (if its parent has a non-zero picking limit). The picking limit of a channel cannot
+be changed. 
 
-When a subscriber to an event channel receives an event from any broker, the event's _picking
-count_ is incremented (it starts at zero). If the picking count becomes equal to (or greater
-than) the picking limit of the class (unless the picking limit is zero), the event is
+When a subscriber to an event channel receives an event from any broker, the event's
+_picking count_ is incremented (it starts at zero). If the picking count becomes equal to (or
+greater than) the picking limit of the class (unless the picking limit is zero), the event is
 immediately deleted by the broker, so preventing any other subscriber receiving the event. 
 
 A channel with a picking limit of 1 is called a _unicast_ channel: only one subscriber to the
@@ -279,13 +294,10 @@ channel.
 -----------------------------------------------------------------------------------------------
 ## System Broker {#sb}
 
-There is always one broker, the _system broker_, which is created by the 
+Every [compartment](../programs/compart.md) makes a broker, the _system broker_, available to
+all executional instances. 
 
-?????
-
-and is available to all executional instances. 
-
-The system broker is also a [multiplexor](#mux). 
+The system broker is a [multiplexor](#mux) and a [directory](../objects/containers.md#dir). 
 
 .....
 
@@ -293,28 +305,25 @@ Because the system broker is a multiplexor, other brokers can be registered with
 software a single point to subscribe to messages that are intended to broadcast without limited 
 scope. 
 
+The system broker is vital in allowing [signals](signals.md) to be communicated from the
+compartment to its [instances](../programs/instances.md), as well as other fundamental events. 
+
 
 
 -----------------------------------------------------------------------------------------------
-## Standard Channels {#std}
-
-There are some [event channels](#chan) that AdaOS publishes to the [system broker](#sb), ......
-
-| Name               | Purpose                                                   |
-| ------------------ | --------------------------------------------------------- |
-| `sys/scry`         | [Object scrying](../objects/scrying.md)                   |
-| `sys/scrycache`    | Object scrying[cache](../objects/scrying.md#cache)        |
-| `sys/cmpt/C`       | [Signals](../rts/signals.md) and other component events   |
-| `` |  |
-| `` |  |
-| `` |  |
-| `` |  |
-| `` |  |
-| `` |  |
+## Event Batching {#bat}
 
 .....
 
+For convenience, the `AdaOS.Events` package declares a type named `Event_Batch`, which is
+itself derived from `Event_Object` but contains an indefinite vector (a dynamically resizable
+array) of event objects. 
 
+The task type `Event_Batcher` is also declared. A task of this type can be fed events, and it 
+will automatically send out a batch after either a certain number of events have been 
+accumulated or a certain amount of time has passed since the first event was fed in. 
+
+.....
 
 
 
@@ -354,19 +363,28 @@ The [Logging](logging.md) and [Auditing](auditing.md) infrastructures .....
 
 
 -----------------------------------------------------------------------------------------------
-## Event Batching
+## Standard Channels {#std}
+
+There are some [event channels](#chan) that AdaOS publishes to the [system broker](#sb), ......
+
+| Name                        | Purpose                                                      |
+| --------------------------- | ------------------------------------------------------------ |
+| `AdaOS.Scrying.chan`        | [Object scrying](../objects/scrying.md)                      |
+| `AdaOS.Scrying_Cache.chan`  | Object scrying [cache](../objects/scrying.md#cache)          |
+| `adaos.cmpt.C.chan`         | [Signals](signals.md) and other compartment events           |
+| `` |  |
+| `` |  |
+| `` |  |
+| `` |  |
+| `` |  |
+| `` |  |
+
+where `C` is a compartment [name](../adaos/compart.md#name). 
+
 
 .....
 
-For convenience, the `AdaOS.Events` package declares a type named `Event_Batch`, which is
-itself derived from `Event_Object` but contains an indefinite vector (a dynamically resizable
-array) of event objects. 
 
-The task type `Event_Batcher` is also declared. A task of this type can be fed events, and it 
-will automatically send out a batch after either a certain number of events have been 
-accumulated or a certain amount of time has passed since the first event was fed in. 
-
-.....
 
 
 

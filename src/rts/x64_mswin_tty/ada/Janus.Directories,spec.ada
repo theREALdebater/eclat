@@ -53,12 +53,12 @@ package AdaOS.Programs.Janus.Directories is
    function Storage_Mode    (Info: in Member_Information) return Wide_String;
    function Access_Control  (Info: in Member_Information) return Wide_String;
 
-   type Attribute_Lock_ID is private;
+   type Property_Lock_ID is private;
 
 
 
-   function Attribute_Value (Info:     in Member_Information;
-                             Atribute: in Attribute_Lock_ID) return Wide_String;
+   function Property_Value (Info:     in Member_Information;
+                             Atribute: in Property_Lock_ID) return Wide_String;
 
    function Info (Directory:   in File_Directory;
                   Member_Name: in Wide_String)

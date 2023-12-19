@@ -4,14 +4,27 @@
 Everything that anyone may need to know about a module class must be encapsulated in a _module 
 class definition_, or _MCD_, which is an XML file of a specific schema, .....
 
+A module _conforms_ to an MCD if it fulfils everything that the MCD promises. 
+
+
 .....
+
+
+
+
+
+-----------------------------------------------------------------------------------------------
+## .....
+
+
+
 
 The schema ..... 
 
 
 
 
-The elements and attributes of a module class definition file are all in the namespace `?????` .....
+The elements and properties of a module class definition file are all in the namespace `?????` .....
 
 The root element is `pxcr`, which .....
 
@@ -30,8 +43,8 @@ implicitly prefixed by the name of the namespace.
 
 This kind of namespace is completely distinct from XML namespaces. 
 
-This element has one mandatory attribute, `name`, which must be set to the name of the 
-namespace. Within the namespace element, any `name` attribute whose value begins with a `.` dot 
+This element has one mandatory property, `name`, which must be set to the name of the 
+namespace. Within the namespace element, any `name` property whose value begins with a `.` dot 
 will have the namespace's name implicitly prepended. 
 
 Within a namespace:
@@ -59,12 +72,24 @@ Within a namespace:
 -----------------------------------------------------------------------------------------------
 ## .....
 
+A module _conforms_ to an MCD if it fulfils everything that the MCD promises. 
 
+This generally means that the module must contain all the elements declared in the MCD, and for
+each subroutine every parameter has the same type as declared in the MCD. This is termed
+_structural conformity_. 
 
+However, conformity also requires that every element obeys the *meaning* of its definition in
+the MCD. This is termed _semantic conformity_. 
 
------------------------------------------------------------------------------------------------
-## .....
+If, for example, there is an element defined in the MCD that is a subroutine which is supposed
+to output a number, then a corresponding element in the module which has exactly the right
+parameters but which outputs some text instead means that the module fails semantic conformity,
+even though it passes structural conformity. 
 
+When ECLAT builds a module from a module library, it automatically checks that the module
+conforms structurally to the MCD. It cannot check semantic conformity. 
+
+In fact, if ECLAT cannot find the MCD, it automatically generates a skeletal MCD. 
 
 
 

@@ -113,7 +113,7 @@ end Prunae;
 We pass the plum into the guardian, and leave it to the guardian to work out the weight of the 
 plum, and whether the caller has a strong enough stomach to eat the plum. 
 
-It is expected that the date and time of the call is also passed in as an attribute 
+It is expected that the date and time of the call is also passed in as a property 
 `Time_of_Call`. That would, for example, enable us at a later point to add a rule that plums 
 may not be eaten after midnight, or that they may not be eaten in September. Only the 
 (specification data governing the) guardian would need to be changed; the Ada source text could 
@@ -155,8 +155,8 @@ private
       record
          Weight_of_Food: Measures.Kilogrammes
             with 
-               Attribute_Name => "weight-of-food",
-               Attribute_Type => "prunae:kilogramme";
+               Property_Name => "weight-of-food",
+               Property_Type => "prunae:kilogramme";
       end record;
 end;
 ```
@@ -178,9 +178,8 @@ is
 end Prunae_Guardian;
 ```
 
-Normally, packages of this kind would be put into a 
-[stub library](../eclat/building.md#stublibs). Libraries using it would be configured to depend 
-on it. 
+Normally, packages of this kind would be put into a [stub
+library](../eclat/building.md#stublibs). Libraries using it would be configured to include it. 
 
 The implementations of the procedure `Prunae_Endorsement_Context'Endorse` will be imported from 
 the generated guardian module. 
@@ -221,11 +220,11 @@ In future there will be real guardian generators supporting:
 
  * role-based security
 
- * attribute-based security
+ * property-based security
 
  * possibly other security models
 
-The attribute-based security guardian generator will use [XACML][1] files to specify the rules 
+The property-based security guardian generator will use [XACML][1] files to specify the rules 
 that it uses to make decisions. 
 
 

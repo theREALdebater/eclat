@@ -118,8 +118,8 @@ wrapped library; all references to the source files are removed. This is the onl
 a wrapped library (except for the generation of stub libraries, mentioned a little further on); 
 a wrapped library cannot be modified. 
 
-Any library is permitted to depend on one or more wrapped libraries. They, in turn, could 
-depend on other wrapped libraries, and so on to form a tree of dependencies. The resulting 
+Any library is permitted to include one or more wrapped libraries. They, in turn, could 
+include other wrapped libraries, and so on to form a tree of dependencies. The resulting 
 ‘effective library’ comprises the visible units of all the libraries in this tree, and there 
 must not be any name clashes. Every dependency would specify the version of the wrapped library 
 it depends on. 
@@ -394,7 +394,7 @@ There will be actual guardians supporting:
  * mandatory security (labels)
  * discretionary security (ACLs)
  * role-based security
- * attribute-based security
+ * property-based security
  * possibly other security models
 
 To start with, we’ll have a dummy guardian that just says ‘Yes’ to all requests. The important 

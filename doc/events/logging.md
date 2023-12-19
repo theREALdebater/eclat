@@ -1,16 +1,17 @@
 -----------------------------------------------------------------------------------------------
-# Logging and Auditing
+# Logging
 
 Whenever something happens, during the execution of a program, that the developers (or 
 testers, evaluators, etc.) might want to know about, it is convenient to be able to write some 
 information about it to a conceptual (or actual) store that is generally called a 'program 
 execution log', or 'program log', or just _log_. 
 
-AdaOS provides a standard infrastructure for _logging_ and [auditing](auditing.md). This 
-infrastructure is based on the AdaOS [event](events.md) infrastructure, but with extra 
-functionality that can be used 'out of the box' by most programs. 
+AdaOS provides a standard infrastructure for _logging_. This infrastructure is based on the
+AdaOS [event](events.md) infrastructure, but with extra functionality that can be used 'out of
+the box' by most programs. 
 
-
+AdaOS also provides an infrastructure for [auditing](auditing.md) based on the logging
+infrastructure. 
 
 
 .....
@@ -54,7 +55,7 @@ When this package initialises, it .....
 
 
 -----------------------------------------------------------------------------------------------
-## Logging Levels
+## Logging Levels {#lev}
 
 .....
 
@@ -120,8 +121,8 @@ unimportant function, for example a function that attempts to tidy up data for t
 This level is an event that, whilst not indicating that anything is seriously wrong, the user 
 needs to be aware of a potential problem or pitfall. 
 
-For example, a program would log detecting that it is getting close to running out of a 
-resource that it needs, such as storage space. 
+For example, this level would be used if a program detected that it is getting close to running
+out of a resource that it needs, such as storage space. 
 
 
 ### Logging Level: Important
@@ -139,45 +140,46 @@ This level is for an event that, whilst is is logged during the normal operation
 program, is only to give a little 'background' information on what is going on. The 
 implication is that events at this level can be discarded (cleared, purged) with impunity. 
 
-For example, .....
+Typically, a lot of information will be logged at this level. 
+
+For example, parameters of the program's execution, such as pivotal values, modes, and so
+forth, from program arguments, environment variables, [configuration](../intro/config.md), or
+other sources, may be reported at this level. 
+
+This is the default logging level for all the logging procedures provided by AdaOS. 
 
 
 ### Logging Level: Debug
 
-This level is for significant events that may provide information to assist testers and
+This level is used for significant events that may provide information to assist testers and
 programmers in the testing and debugging of software. 
 
-.....
+For example, this level might be used to report that the program is about to enter a loop that
+processes many items. The programmer may be interested that execution has reached this point in
+the program, perhaps, because there seems to be a program that occurs either before or after
+the loop, and the programmer is trying to find out which. 
 
 
 ### Logging Level: Trace
 
-This level is also for events that provide information to assist testers and programmers in
-the testing and debugging of software, but this level is for events that are extremely
-detailed, rather than the significant debugging events of the Debug level. 
+This level is also used, besides the Debug level, for events that provide information to assist testers and programmers
+in the testing and debugging of software.
 
-.....
+However, the Trace level is used for events that are extremely detailed, rather than the
+significant debugging events of the Debug level. 
+
+For example, this level might be used to report the execution of each iteration in a loop that
+processes many items. The programmer may, perhaps, have determined that a problem occurs
+somewhere within the loop, and is trying to trying to pinpoint it. 
+
+Because the loop, in this example, processes many items, a large amount of logging information
+will be produced. So the programmer has it logged a Trace level so that it can be filtered out
+or turned off for those runs which do not require it, without losing the essential information
+logged at Debug level. 
 
 
 -----------------------------------------------------------------------------------------------
-## Logging Events
-
-The private abstract type `Logging_Event`, derived from `Event_Object` (declared in the package
-`AdaOS.Events`), declares the function `Level`, which should return the logging level of the
-event. By default, it returns `Important`. 
-
-
-
-
-### Logging Event Level
-
-Generally, concrete logging event types should override this function to return the appropriate
-logging level for events of the type. In most cases, this is likely to be a constant for any
-one type, but it might be variable sometimes. 
-
-
-
-### Locus
+### Locus {#loc}
 
 An _execution locus_ is an opaque value that identifies the library in which the body of a
 subprogram was declared. 
@@ -186,29 +188,58 @@ subprogram was declared.
 
 The package `System.Composition` contains the following visible declarations:
 
-    type Execution_Locus is private;
+```ada
+type Execution_Locus is private;
 
-    function Locus return Execution_Locus with Inline, .....;
+function Current_Locus return Execution_Locus with Inline, .....;
 
-    function Name (Locus: in Execution_Locus) return String;
+function Locus (E: in Exception_Information) return Execution_Locus;
 
-    function Wide_Name (Locus: in Execution_Locus) return Wide_String;
+function Name (Locus: in Execution_Locus) return String;
 
-    function Wide_Wide_Name (Locus: in Execution_Locus) return Wide_Wide_String;
+function Wide_Name (Locus: in Execution_Locus) return Wide_String;
 
-The function `Locus` returns the locus of the innermost enclosing subprogram body of the
-declaration or statement in which the function `Locus` was called. 
+function Wide_Wide_Name (Locus: in Execution_Locus) return Wide_Wide_String;
+```
+
+The function `Current_Locus` returns the locus of the innermost enclosing subprogram body of
+the declaration or statement in which the function `Locus` was called. 
 
 The function `Name` returns the full name of the library identified by an `Execution_Locus`
 value. There are also functions `Wide_Name` and `Wide_Wide_Name`. 
 
+
+-----------------------------------------------------------------------------------------------
+## Logging Events
+
+The private abstract type `Logging_Event`, derived from `Event_Object` (declared in the package
+`AdaOS.Events`), declares the function `Level`, which should return the logging level of the
+event. By default, it returns `Note`. 
+
+.....
+
+
+### Level
+
+Generally, concrete logging event types should override this function to return the appropriate
+[logging level](#lev) for events of the type. In most cases, this is likely to be a constant
+for any one type, but it might be variable sometimes. 
+
+
+### Locus
+
 The following function is declared in the visible part of the package `AdaOS.Logging`:
 
-    function Locus (Event: in Logging_Event) return Logging_Locus;
+```ada
+function Locus (Event: in Logging_Event) return Logging_Locus is abstract;
+```
 
-This function returns the locus of the declaration or statement in which the given logging
-`Event` was instantiated (created, in practical terms). 
+This function returns the [locus](#loc) associated with the event. 
 
+This is set to the value of the `Locus` parameter of all the logging procedures provided by
+AdaOS. This parameter always has a default which calls the `Current_Locus` function, so, by
+default, this will indicate the declaration or statement in which the given logging procedure
+was called. 
 
 
 -----------------------------------------------------------------------------------------------
@@ -293,7 +324,11 @@ The default level is `Important`.
 The package `AdaOS.Logging` contains the following declaration:
 
 ```ada
-procedure Log (Event: in Logging_Event'Class; Ignore: Boolean := False) with Inline;
+procedure Log (Event:  in Logging_Event'Class;
+               Ignore: in Boolean := False;
+               Locus:  in Execution_Locus := System.Composition.Current_Locus)
+with
+    Inline;
 ```
 
 This procedure automatically checks that the `Ignore` parameter is not `True` and that the
@@ -308,7 +343,8 @@ In particular, make the actual `Event` parameter of this procedure an expression
 constructs the event object. If the event is not to be logged, the expression will not be
 evaluated, so the computing resources (processor time, memory, etc.) necessary to construct the
 event object will not be used up needlessly. If the expression is too big, pot it into a
-function. 
+function; ensure that the function is marked as `Pure`, so the call to it can be eliminated if
+appropriate. 
 
 The `Ignore` parameter is there as a convenient way to control logging based on an expression. .....
 
@@ -319,13 +355,16 @@ The `Ignore` parameter is there as a convenient way to control logging based on 
 
 The package `AdaOS.Logging` .....
 
-    type Text_Logging_Event is new Logging_Event with private;
-
+```ada
+type Text_Logging_Event (Level: Logging_Level := Note) is new Logging_Event with private;
+```
 .....
 
-    function Text (Event: in Text_Logging_Event) return Unbounded_String;
+```ada
+function Text (Event: in Text_Logging_Event) return Unbounded_String;
 
-    procedure Set_Text (.....);
+procedure Set_Text (.....);
+```
 
 
 
@@ -344,6 +383,9 @@ A global property `Current_Logging` is also declared in `Ada.Text_IO.Logging`, w
 initialised to `Standard_Logging` unless logging is [redirected](../rts/compart.md#redir) for
 the program instance. 
 
+A global property `Current_Logging_Level` is declared in `Ada.Text_IO.Logging`, which is
+initialised to `Note`. This is the [logging level](#lev) used to construct the
+`Text_Logging_Event` objects. 
 
 
 
@@ -403,7 +445,7 @@ exception occurrence in a form suitable to be logged.
 
 
 
-A _current exception logging event class_ can be configured for a 
+A _current exception logging event channel_ can be configured for a 
 [compartment](../rts/compart.md).
 
 The function: 
@@ -411,13 +453,13 @@ The function:
     AdaOS.Execution.Task_Instance.Compartment.Exception_Logging
 
 returns the current exception logging event channel, of type `access 
-AdaOS.Events.Event_Class'Class`. 
+AdaOS.Events.Event_Channel'Class`. 
 
-This function never returns null. If, when this function is called---or any other subprogram 
-that uses the the current exception logging event channel---and the current exception logging 
-event channel is not set, then a new event channel object, with the name `"P.exceptions"` (where 
-`P` is the name of the program) and [current logging broker](#currbrok), is automatically 
-created. 
+This function never returns null. If, when this function is called---or any other subprogram
+that uses the the current exception logging event channel---and the current exception logging
+event channel is not set, then a new event channel object, with the name `"C.exceptions"`
+(where `C` is the name of the compartment) and [current logging broker](#currbrok), is
+automatically created. 
 
 The procedure `Set_Exception_Logging` has two overloadings.
 
@@ -425,10 +467,10 @@ Calling:
 
     AdaOS.Execution.Self.Compartment.Set_Exception_Logging (C);
 
-with one parameter `C`, of type `access AdaOS.Events.Event_Class'Class`, sets the current 
-exception logging event channel to `C`. This procedure can be called with an parameter value of 
-null, to unset the current exception logging event channel (so that a new will be automatically 
-created on demand, as described just above). 
+with one parameter `C`, of type `access AdaOS.Events.Event_Channel'Class`, sets the current
+exception logging event channel to `C`. This procedure can be called with an parameter value of
+null, to unset the current exception logging event channel (so that a new one will be
+automatically created on demand, as described just above). 
 
 However, calling:
 
@@ -441,10 +483,17 @@ The procedure:
 
     AdaOS.Logging.Log (E, L);
 
-has the parameter `E`, of type `Ada.Exceptions.Exception_Information`. This procedure creates 
-an `Exception_Event` object from the exception information `E`, and then sends it to the 
-current exception logging event channel. The parameter `L`, of type `Logging_Level`, determines 
-the level at which the exception is logged; it is optional, and has a default of `Error`. 
+has the parameter `E`, of type `Ada.Exceptions.Exception_Information`. 
+
+This procedure creates an `Exception_Event` object from the exception information `E`, and then
+sends it to the current exception logging event channel. 
+
+The parameter `L`, of type `Logging_Level`, determines the [logging level](#lev) of the
+`Exception_Event` object, and the level at which the exception is logged; it is optional, and
+has a default of `Error`. 
+
+The [locus](#loc) of the `Exception_Event` object is derived from the exception information `E`
+using the `Locus` function. 
 
 
 
@@ -480,7 +529,7 @@ In both cases, the program is then terminated .....
 
 
 
-When the program starts `Handle_Unhandled_Exception` has the value returned by a call of
+When the program starts, `Handle_Unhandled_Exception` has the value returned by a call of
 `Default_Unhandled_Exception_Handler`, which never returns null, and has the following
 behaviour: 
 

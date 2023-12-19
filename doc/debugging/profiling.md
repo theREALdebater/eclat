@@ -5,10 +5,10 @@ ECLAT and the Realizor include a _profiling_ capability that is based on
 [monitoring](monitoring.md].
 
 ?????The [monitoring](monitoring.md) mechanism provided by ECLAT can be used to provide _profiling_ 
-of the executions of a [assembly](../rts/assemblies.md). 
+of the executions of a [partition](../rts/partitions.md). 
 
 Broadly, profiling can mean many things, but here it is used to specifically mean the recording 
-of the time taken executing each unit within the assembly. 
+of the time taken executing each unit within the partition. 
 
 This profiling data can be used by the [Realizor](../pxcr/Realizor.md#profiling) to help to 
 optimise (improve the efficiency of) the emitted machine code. 
@@ -18,7 +18,7 @@ optimise (improve the efficiency of) the emitted machine code.
 -----------------------------------------------------------------------------------------------
 ## 
 
-Every time the assembly is executed---see [Executional Instances](../rts/Instances.md)
+Every time the partition is executed---see [Executional Instances](../rts/Instances.md)
 ---.....
 
 

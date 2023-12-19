@@ -535,7 +535,7 @@ current library.
 Must be followed by the names of two libraries, the first is the _current working library_ (_CWL_) and the second is 
 the _base library_. 
 
-Makes the CWL depend on the base library, if it doesn't already. No error if it 
+Makes the CWL include the base library, if it doesn't already. No error if it 
 does already. Circularity is detected and results in an error. Similarly, any clashes of unit 
 names are detected, and results in an error. 
 
@@ -553,7 +553,7 @@ can be used to check if there is any circularity or if there are unit name clash
 Must be followed by the names of two libraries, the first is the _current working library_ (_CWL_) and the second is 
 the _base library_. 
 
-Makes the CWL cease to depend on the base library. No error if it doesn't already. 
+Makes the CWL cease to include the base library. No error if it doesn't already. 
 
 .....
 
@@ -731,7 +731,7 @@ configure the library the same as the current CWL is already configured.
 
 It is important to understand that such a script cannot be guaranteed to perfectly recreate the configuration, for a number of reasons: 
 
- * it is possible for the initial (default) configuration of a nerwly created library changes in the future; 
+ * it is possible for the initial (default) configuration of a newly created library changes in the future; 
  
  * .....
 

@@ -1,45 +1,8 @@
 -----------------------------------------------------------------------------------------------
-# Signals
+# Program Signals
 
-A _signal_ .........
-
-......
-
-
-
-
------------------------------------------------------------------------------------------------
-## 
-
-
-
-
------------------------------------------------------------------------------------------------
-## 
-
-
-
-
------------------------------------------------------------------------------------------------
-## 
-
-The synchronised interface type `System_Signal`, visibly declared in the package
-`AdaOS.Signals`, represents a signal .....
-
-A signal is a kind of [event](../events/events.md). The type `System_Signal` is derived from
-the type `Event_Object` which is declared in the package `AdaOS.Events`.
-
-
-
-
-
-
-
-?????The synchronised interface type `System_Signal`, declared in the package `AdaOS.Signals`, 
-represents a signal .....
-
-?????This type is derived from the type `System_Packet`, declared in the package 
-`AdaOS.Communication`. A signal is therefore a kind of [packet](ipc.md). 
+A _program signal_ is a kind of communication from a [compartment](../programs/compart.md) to
+its [executional instances](../programs/instances.md). 
 
 ......
 
@@ -49,19 +12,41 @@ represents a signal .....
 -----------------------------------------------------------------------------------------------
 ## 
 
-When an [executional instance](../adaos/instances.md) is created, a special 
-[event channel](../events/events.md#chan) is created for the instance. 
 
-The name of this channel is:
 
-    system.signals.S
 
-where `S` is the
+-----------------------------------------------------------------------------------------------
+## 
 
-?????
 
- [instance ID](instances.md#id) of the instance and `C` is the name of the
-instance's compartment.
+
+
+-----------------------------------------------------------------------------------------------
+## 
+
+The interface type `Program_Signal`, visibly declared in the package `AdaOS.Programs.Signals`,
+represents a program signal .....
+
+A program signal is a kind of [event](events.md). The type `Program_Signal` is derived from the
+type `Event_Object` which is declared in the package `AdaOS.Events`. 
+
+......
+
+
+
+
+-----------------------------------------------------------------------------------------------
+## 
+
+When a [compartment](../programs/compart.md) is created, a special
+[event channel](../events/events.md#chan) is created for the compartment to send events to its
+[executional instances](../programs/instances.md). 
+
+The name of the event channel is:
+
+    system.signals.C
+
+where `C` is the name of the compartment.
 
 ......
 
@@ -172,13 +157,13 @@ The following standard signal types are declared in `AdaOS.Signals`:
 | `` |  
 | `` |  
 
-??????These signals are all empty (they have no components of their own). They will inherit the 
-components of the type `System_Signal` that they all derive from, but these components are 
+??????These signals are all empty (they have no components of their own). They will inherit the
+components of the type `Program_Signal` that they all derive from, but these components are
 private to the Ada implementation. 
 
 
 
-Each of these different signal types are declared as types derived from `System_Signal`, ......
+Each of these different signal types are declared as types derived from `Program_Signal`, ......
 
 
 

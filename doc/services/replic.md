@@ -109,8 +109,8 @@ event channel](#chan) to communicate with each other.
 Replication (co-)controllers uses two strategies to control and monitor the health of the
 services in the battery: 
 
- * Any service in the battery can send events that correspond to events such as service
-   failure. Replication controllers can pick up these events and handle them. 
+ * Any service in the battery can send events such as, for example, service failure
+   notification. Replication controllers can pick up these events and handle them. 
 
  * Replication controllers send out regular _heartbeat_ [messages](../events/messaging.md) to
    the services. Each service must quickly respond to each heartbeat message with an
@@ -135,7 +135,7 @@ services in the battery:
 
 When one or more services or replication controllers needs to be updated, the requisite 
 
- [Kantan](../../../kantan/doc/Intro.md) 
+ [Kantan](../kantan/kantan.md) package manager 
 
 manage the updating and reinstallation of the service
 programs of a battery. 
@@ -240,91 +240,8 @@ efficiently achieved by comparing these hash values instead of comparing entire 
 -----------------------------------------------------------------------------------------------
 ## Nyota
 
-The [Nyota](../tools/nyota.md) command-line tool can be used to generate the following Ada
-source text code: 
+The [Nyota](../tools/nyota.md) command-line tool can be used .....
 
- * skeleton for the service itself
-
- * complete implementation of the service program 
-
- * complete implementation of the replication controller service and its service program 
-
- * skeleton for a test harness program 
-
- * in the future, optionally, a web API (SOAP or REST) wrapper program 
-
-
-
-
-
-
-
-
-
-
-
-
-
-Each method (primitive operation) of a service is assigned one of three _replication routing_
-settings: 
-
- * _pan-replicant routing_
-
- * _single-replicant routing_
-
- * _custom routing_ 
-
-A method is, by default assigned as pan-replicant if it is not explicitly assigned. 
-
-
-
-
-
-
-
-
-### Pan Replicant Routing
-
-When a call is made to a method with pan-replicant routing, the same call is routed, by the
-replication controller, to the same method of *all* the currently active replicants. 
-
-Thus, the method will be executed in each of the replicants, and will receive the same values
-for all its input parameters. 
-
-Each replicant is therefore expected to update its state (files, database, anything that is
-persistent) identically, and is expected to return the same values in its output parameters. 
-
-The replication controller gathers the return values of the output parameters from all of the
-replicants, and checks that they are all equal. It waits for all of the replicants to finish
-execution. If any response is different, or if any (or all) of the method invocations fails (by
-propagating an exception), then .....
-
-.....
-
-
-
-
-
-
-
-### Single Replicant Routing
-
-When a call is made to a method with single replicant routing, the call is routed, by the
-replication controller, to the same method of any one of the currently active replicants, chosen
-at random. 
-
-.....
-
-Single replicant routing is suitable for methods that do not (significantly) change the
-service's state. Often a service has many 'query' methods that only return information derived
-from the service's state, but which do not modify the state. Since each replicant has the same
-state as all the others, it should be sufficient for any one of the replicants to handle this
-kind of method. 
-
-
-
-
-### Custom Routing 
 
 
 

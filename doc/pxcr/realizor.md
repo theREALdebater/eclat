@@ -36,30 +36,6 @@ image, or a segment image it references.
 
 
 -----------------------------------------------------------------------------------------------
-## Executable Images {#img}
-
-An _executable image_ is the result of realising a set of modules into either an executable
-(program) file (hosted platforms) or a _boot image_ or a set of _segment images_ (AdaOS
-platform). 
-
-The configuration data associated an executable image guides how it is to be realised. 
-
-.....
-
-
-
-
-For a [hosted platform](targets.md#plat), an executable image will be an executable program of
-the host platform. 
-
-For the AdaOS Native platform, an executable image is either a [boot image](#boot) or a set of
-[segment images](?????). A boot image is stored in a file. Each segment image is stored in a
-file. 
-
-
-
-
------------------------------------------------------------------------------------------------
 ## Modules {#mod}
 
 .....
@@ -252,14 +228,14 @@ the realisation of the `pxcr` command-line tool.
 
 
 -----------------------------------------------------------------------------------------------
-## Run-Time Support Configuration Helper {#rtsch}
+## System Configuration Helper {#syscon}
 
-The _Run-Time Support Configuration Helper_ is a [Realizor Helper plugin](helpers.md) which
-[generates](../pxcr/modules.md#genmod) a [run-time support](../rts/rts.md) configuration module
+The _System Configuration Helper_ is a [Realizor Helper plugin](helpers.md) which
+[generates](../pxcr/modules.md#genmod) a [system configuration module](../config/sysconfig.md) 
 .....
 
 
-[fixed assembly table](../rts/assemblies.md#fixed)
+
 
 
 
@@ -269,7 +245,15 @@ The _Run-Time Support Configuration Helper_ is a [Realizor Helper plugin](helper
 
 
 -----------------------------------------------------------------------------------------------
-## 
+## Pseudo Modules {#pseudo}
+
+.....
+
+A _pseudo-module_ only exists as loaded (in memory) into the Realizor, but not as a file on
+disk anywhere. 
+
+
+Typically, pseudo-modules are created by [helpers](helpers.md) .....
 
 
 

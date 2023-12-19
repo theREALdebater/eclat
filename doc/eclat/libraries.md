@@ -1,8 +1,24 @@
 -----------------------------------------------------------------------------------------------
 # Libraries and Compilation
 
+An ECLAT _library_ mainly encapsulates what is represented by some source text, but stored in
+one place, in an internal (binary) format. 
+
+The source text is usually gathered from the contents of a set of plain text files. Typically,
+these files are all located within a tree with a single root directory, but the files can
+actually be anywhere. 
+
+The source text files are said to _compiled_ by ECLAT into a library. 
+
+.....
 
 
+
+
+
+
+-----------------------------------------------------------------------------------------------
+## .....
 
 There are two kinds of ECLAT library: 
 
@@ -14,16 +30,30 @@ Both libraries produce PXC modules, but an Ada library can only contain units ar
 compilation of Ada source text, whereas a C library can only contain units from the compilation
 of C source text. 
 
+.....
 
 
+
+-----------------------------------------------------------------------------------------------
+## .....
+
+A library can be stored in two forms:
+
+ * _wrapped_; 
+ 
+ * _unwrapped_.
 
 Certain basic characteristics remain 
 
 
+### Unwrapped
 
 
 
-_wrapped_; _unwrapped_.
+
+### Wrapped
+
+
 
 
 
@@ -101,7 +131,7 @@ A wrapped library is all stored in one file (with the extension `.elw`). It is a
 universally unique name, which is a URN. 
 
 A wrapped library cannot be modified. The [`eclat` command-line tool](../tools/eclat.md) allows 
-an unwrapped library to be converted into a wrapped libary. All unused and inaccessible units 
+an unwrapped library to be converted into a wrapped library. All unused and inaccessible units 
 are removed from the wrapped library; all references to the source files are removed. This is 
 the only way to create a wrapped library (except for the generation of stub libraries, 
 mentioned a little further on). 
@@ -114,13 +144,13 @@ Wrapped libraries can be readily distributed as a resource, for example using
 -----------------------------------------------------------------------------------------------
 ## Effective Library
 
-Any library is permitted to depend on one or more wrapped libraries. They, in turn, could 
-depend on other wrapped libraries, and so on to form a tree of dependencies. The resulting 
-_effective library_ comprises the visible units of all the libraries in this tree, and there 
+Any library is permitted to _include_ one or more wrapped libraries. They, in turn, could
+include other wrapped libraries, and so on to form a tree of inclusions. The resulting
+_effective library_ comprises the visible units of all the libraries in this tree, and there
 must not be any name clashes. 
 
-Every dependency specifies the [compatibility version](../intro/versions.md#comp) of the 
-wrapped library it depends on. 
+Every inclusion specifies the [compatibility version](../intro/versions.md#comp) of the wrapped
+library being included. 
 
 
 

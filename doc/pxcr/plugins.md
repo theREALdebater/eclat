@@ -6,6 +6,26 @@ in order to provide optional additional functionality to other modules in the im
 
 A plugin _extends_ one or more other modules, which are called the _base modules_ of the plugin. 
 
+.....
+
+
+
+-----------------------------------------------------------------------------------------------
+## 
+
+
+
+
+
+
+
+
+
+
+### Transivity of Extension
+
+A plugin _extends_ one or more other modules, which are called the _base modules_ of the plugin. 
+
 Note however the following situation is possible (and frequently occurs):
 
  * there are three modules, `A`, `B`, and `C`; 
@@ -16,18 +36,26 @@ Note however the following situation is possible (and frequently occurs):
  
  * `B` extends `C`, so that `C` is a base module of `B`. 
  
-Of course, this transivity could involve four modules or more. 
+Of course, this _transivity_ could involve four modules or more. 
 
 .....
+
+
+### Location of Plugins
 
 In general, multiple plugins can be added to an image, provided all the plugins .....
 
-.....
+For installed [Kantan](../kantan/kantan.md) packages, there is a convention regarding the
+location of plugin modules. 
+
+For a package installation `P`, 
 
 
 
------------------------------------------------------------------------------------------------
-## 
+
+
+
+
 
 
 
@@ -47,7 +75,7 @@ require that class.
 plugin, its base module will fulfil a module class that the plugin will require. The module 
 class will define what the plugin can do in respect of its base module. 
 
-[Module classes](modules.md#classes) are not to be confused with [plugin classes](#classes). 
+[Module classes](modules.md#class) are not to be confused with [plugin classes](#class). 
 
 .....
 
@@ -278,7 +306,8 @@ end;
 It is vital that the package is declared pure, and that the `Fruit` interface is declared 
 `Preelaborable_Initialization`. 
 
-The common library is never built, but is only ever used as a foundation for other libraries. 
+The common library is a [contributory library](../eclat/building.md#contlib); it is never
+built, but is only ever used as a foundation for other libraries. 
 
 
 ### Base Module
@@ -287,8 +316,7 @@ Then we create a library for the base module
 
 ?????of the plugin class `acme.farming.fruit`. 
 
-This 
-library will depend on the common library, and it will include the following package:
+This library will include the common library, and it will include the following package:
 
 ```ada
 with Ada.Objects;
@@ -311,7 +339,7 @@ procedure, and at some point calling the `Eat` procedure for some or all of the 
 fruits. 
 
 ?????We will configure a build for the base module, but in general there are many possibilities: the 
-base module may be an assembly, in which case we would probably build it in `assembly` 
+base module may be a partition, in which case we would probably build it in `partition` 
 mode; the base module might, on the other hand, itself be a plugin (probably of a different 
 plugin class), in which case, of course, it would be built in `plugin` mode; the base module 
 might even be the start module of the image. 
@@ -378,7 +406,7 @@ We imagine three libraries, named:
 The `.common` library contains the package `Fructacious`. The `.management` library contains 
 the package `Fruit_Registration`. The `.prunae` library contains the package `Prunae`. 
 
-Both the management and the prunae libraries depend on the common library:  
+Both the management and the prunae libraries include the common library:  
 
 ?????    eclat/library(acme.fruit.management.lib)/dependencies(acme.fruit.common.lib)/versions=1.0
 ?????    eclat/library(acme.fruit.prunae.lib)/dependencies(acme.fruit.common.lib)/versions=1.0

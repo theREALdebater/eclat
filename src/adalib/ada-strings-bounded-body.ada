@@ -41,13 +41,13 @@ package body Ada.Strings.Bounded is
       begin
          if Source'Length <= Max_Length then
             Result.Length := Source'Length;
-            Result.Value(1..Source'Length) := Source;
+            Result(1..Source'Length) := Source;
          else
             Result.Length := Max_Length;
             case Drop is
-               when Left  => Result.Value :=
+               when Left  => Result :=
                            Source(Source'First..Source'First-1+Max_Length);
-               when Right => Result.Value :=
+               when Right => Result :=
                              Source(Source'Last-Max_Length+1..Source'Last);
                when Error => raise Length_Error;
             end case;
@@ -59,7 +59,7 @@ package body Ada.Strings.Bounded is
       ----------
       function To_String (Source: in Bounded_String) return String is
          Result: constant String(1..Source.Length) :=
-                                            Source.Value(1..Source.Length);
+                                            Source(1..Source.Length);
       begin
          return Result;
       end;
@@ -72,19 +72,19 @@ package body Ada.Strings.Bounded is
       begin
          if Max_Length - Left.Length >= Right.Length then
             return (Left.Length+Right.Length,
-                    Left.Value(1..Left.Length) &
-                                             Right.Value(1..Right.Length));
+                    Left(1..Left.Length) &
+                                             Right(1..Right.Length));
          else
             case Drop is
                when Left  => return (Max_Length,
-                                     Left.Value(Left.Length-
+                                     Left(Left.Length-
                                                 Max_Length+
                                                 Right.Length+
                                                 1..Left.Length) &
-                                             Right.Value(1..Right.Length));
+                                             Right(1..Right.Length));
                when Right => return (Max_Length,
-                                     Left.Value(1..Left.Length) &
-                                     Right.Value(1..Max_Length-
+                                     Left(1..Left.Length) &
+                                     Right(1..Max_Length-
                                                     Left.Length));
                when Error => raise Length_Error;
             end case;
@@ -100,16 +100,16 @@ package body Ada.Strings.Bounded is
       begin
          if Max_Length - Left.Length >= Right'Length then
             return (Left.Length+Right'Length,
-                    Left.Value(1..Left.Length) & Right);
+                    Left(1..Left.Length) & Right);
          else
             case Drop is
                when Left  => return (Max_Length,
-                                     Left.Value(Left.Length-
+                                     Left(Left.Length-
                                                 Max_Length+
                                                 Right'Length+
                                                 1..Left.Length) & Right);
                when Right => return (Max_Length,
-                                     Left.Value(1..Left.Length) &
+                                     Left(1..Left.Length) &
                                      Right(Right'First..Right'First+
                                                         Max_Length-
                                                         Left.Length));

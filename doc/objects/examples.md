@@ -56,9 +56,9 @@ is
       new AdaOS.Objects.System_Object
    with
       entry Engage (Object:     not null access System_Object;
-                     Controller: access Transaction_Controller'Class := Task_Transaction.Value;
-                     Authority:  in     Security_Authority           := Task_Authority.Value;
-                     Identity:   in     Security_Identity            := Task_Identity.Value);
+                     Controller: access Transaction_Controller'Class := Task_Transaction;
+                     Authority:  in     Security_Authority           := Task_Authority;
+                     Identity:   in     Security_Identity            := Task_Identity);
 
       entry Disengage (Object: access System_Object);
 
@@ -119,12 +119,12 @@ is
       
    function Categories (Call: in Keep_Service_Call) return Name_Set;
 
-   function Attributes (Call: in Keep_Service_Call) return Name_Set;
+   function Properties (Call: in Keep_Service_Call) return Name_Set;
 
-   function Attribute_Value (Call: in Keep_Service_Call; 
+   function Property_Value (Call: in Keep_Service_Call; 
                               Name: in String) return String;
 
-   function Set_Attribute (Call: in out Keep_Service_Call; 
+   function Set_Property (Call: in out Keep_Service_Call; 
                               Name: in String; 
                               Value: in String);
 
@@ -162,7 +162,7 @@ is
       return Result;
    end;
 
-   function Attributes (Call: in Keep_Service_Call) return Name_Set
+   function Properties (Call: in Keep_Service_Call) return Name_Set
    is
       Result: Name_Set;
    begin
@@ -170,7 +170,7 @@ is
       return Result;
    end;
 
-   function Attribute_Value (Call: in Keep_Service_Call; 
+   function Property_Value (Call: in Keep_Service_Call; 
                               Name: in String) return String
    is
    begin
@@ -178,7 +178,7 @@ is
       raise ?????;      
    end;
 
-   function Set_Attribute (Call: in out Keep_Service_Call; 
+   function Set_Property (Call: in out Keep_Service_Call; 
                               Name: in String; 
                               Value: in String)
    is

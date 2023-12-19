@@ -260,14 +260,14 @@ and Mode
 
 
    --\
-   --/ Member file name and attribute values:
+   --/ Member file name and property values:
 
    function File_Name (Directory: in File_Directory;
                        File:      in File_Lock_ID) return Wide_String;
 
-   function Attribute_Value  (Directory: in File_Directory;
+   function Property_Value  (Directory: in File_Directory;
                               File:      in File_Lock_ID;
-                              Attribute: in Attribute_Lock_ID) return Wide_String;
+                              Property: in Property_Lock_ID) return Wide_String;
 
    --\
    --/ :
@@ -452,7 +452,7 @@ private
 
    function Object_Name (Info: in Member_Information) return Wide_String is
    begin
-      return Info.Index.Find("Name").Value;
+      return Info.Index.Find("Name");
    end;
 
    function Count_Items (Info: in Member_Information) return Natural is

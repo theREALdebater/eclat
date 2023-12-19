@@ -35,11 +35,13 @@ so that they can be loaded and executed by prior stages in the bootstrap process
 -----------------------------------------------------------------------------------------------
 ## Boot Images {#img}
 
-For the AdaOS Native platform, an executable image is either a _boot image_ or a set of _segment images_. 
+For the AdaOS Native platform, an executable image is either a _boot image_ or any one of a set
+of _segment images_. 
 
 
 
-Each segment image file is stored in a separate file, .....
+A boot image or a segment image is stored in a separate file, called either a _boot image file_
+or a _segment image file_, .....
 
 
 
@@ -53,7 +55,7 @@ next restarted (or fully powered down and then powered up again).
 
 
 
-A _boot image_ is a file that contains the image (binary data), in a file, of: 
+A _boot image_ contains the image (binary data) of all of the following: 
 
  * A [primary bootloader](#btldr1); 
 
@@ -76,7 +78,9 @@ up of a set of segment images.
 
 One of these segments will be configured as the _initial segment_. 
 
-It is the initial segment 
+It is the initial segment .....
+
+.....
 
 
 
@@ -85,8 +89,8 @@ It is the initial segment
 -----------------------------------------------------------------------------------------------
 ## Initial Module {#imod}
 
-An [executable image](images.md), or a set of segment images (AdaOS Native), will almost always
-be [realised](realizor.md) from multiple [modules](modules.md). 
+An [executable image](images.md), or a segment image (AdaOS Native), will almost always be
+[realised](realizor.md) from multiple [modules](modules.md). 
 
 On a hosted [platform](targets.md#plat), of these modules, there must be exactly one that is
 configured as the _initial module_ of the image (or set of images). 
@@ -94,24 +98,6 @@ configured as the _initial module_ of the image (or set of images).
 On the AdaOS Native platform, one of the segments will be configured as the _initial segment_,
 and within that segment, one of the contributing modules will be configured as the initial
 module. 
-
-
-
-
-
------------------------------------------------------------------------------------------------
-## {#}
-
-
-
-
-
-
-
------------------------------------------------------------------------------------------------
-## {#}
-
-
 
 
 
@@ -161,7 +147,12 @@ simple piece of software whose job is to:
 The Realizor is accompanied by a set of tertiary bootloaders named `AdaOS.PXCB3.x` where `x`
 indicates the _tertiary boot architecture_: 
 
+
+
+
+
 .....
+
 
 
 
@@ -175,7 +166,8 @@ operating system (or which system image) they wish the computer to boot into.
 
 If the user chooses AdaOS Native, the secondary bootloader then: 
 
- 1. Loads the tertiary bootloader into memory, from a file in a filesystem supported by AdaOS; 
+ 1. Loads the [tertiary bootloader](#btldr3) into memory, from a file in a filesystem supported
+    by AdaOS; 
 
  2. Hands over control to the tertiary bootloader. 
 
@@ -308,7 +300,7 @@ Examples of alternative primary bootloaders include:
 
  * [BIOS][1]
  * [coreboot][2]
- * [Libreboot][3], a coewboot distribution
+ * [Libreboot][3], a coreboot distribution
  * [DasU-Boot][4]
 
 The secondary bootloader is the 'payload' in coreboot nomenclature. 
@@ -324,7 +316,7 @@ The secondary bootloader is the 'payload' in coreboot nomenclature.
 
 
 -----------------------------------------------------------------------------------------------
-## Master Boot Record (MBR) {mbr#}
+## Master Boot Record (MBR) {#mbr}
 
 On a storage device which is formatted using the IBM PC partitioning system (the hard disk
 partitioning system of the original IBM XT computer product), .....
@@ -340,11 +332,11 @@ primary bootloader of one of the partitions it defines.
 See [Wikipedia](https://en.wikipedia.org/wiki/Master_boot_record) for more details of the structure 
 of the MBR.
 
-The [Boot Installer](#inst) is able to set the various parameters within the MBR to correct
-values, and then write an MBR image (file) into the boot sector of a disk. 
+The [Boot Installer](#inst) is able to set the various parameters within the MBR to their
+correct values, and then write an MBR image (file) into the boot sector of a disk. 
 
-The Realizor is accompanied by an _MBR image_ named, which is merely a tiny piece of 8086 instruction
-set machine code in a file (named `AdaOS.MBR.bin`).  
+The Realizor is accompanied by an _MBR image_ , which is merely a tiny piece of 8086
+instruction set machine code in a file (named `AdaOS,MBR.bin`).  
 
 There are other MBR images available, and any of these can be used instead. Be wary, however,
 of security considerations. 
@@ -427,8 +419,8 @@ Various options allow the behaviour of the Boot Installer to be configured .....
 
 
 The Boot Installer is wrapped as a [plugin](plugins.md) for a variety of programs, such as the
-[Kantan](?????) package manager for example, and also as a standalone [command-line
-tool](../tools/tools.md). 
+[Kantan](../kantan/kantan.md) package manager for example, and also as a standalone
+[command-line tool](../tools/tools.md). 
 
 
 
@@ -444,6 +436,91 @@ tool](../tools/tools.md).
 
 -----------------------------------------------------------------------------------------------
 ## {#}
+
+
+The very first instructions must set up a stack space for each hart: 
+
+```ada
+with System;
+with Interfaces;
+with RISCV; -- RISC V general
+with RISCV.RV64I; -- RISC V 64-bit base (integer) ISA
+with RISCV.RV64M; -- RISC V 64-bit multiplication/division ISA
+with RISCV.RV64Zicsr; -- RISC V 64-bit CSR extension ISA
+with SuperSOC;
+
+use Interfaces;
+
+Reg_SP: constant RISCV.Reg := 2;
+
+MM_Stack_Size: constant := 1024 * 4; -- 4 KiB
+
+MM_Stacks: array (SuperSOC.Harts * MM_Stack_Size) of Unsigned_8
+with
+   Packed_Array, 
+   Packed_Array_Element;
+
+-- Machine mode timer interrupts:
+Timer_Scratch: array (SuperSOC.Harts, 5) of Unsigned_64
+with
+   Packed_Array, 
+   Packed_Array_Element;
+
+.....
+
+procedure Set_Up_Machine_Mode_Stacks_SuperSOC
+with
+   Machine_Code,
+   Inline
+is
+   use RV64, RV64I, RV64M, RV64Zicsr;
+begin
+   -- Set up the machine mode stacks for all harts:
+   fII'( Op_LA,    Reg_SP,     Stacks_Base          );
+   fII'( Op_LI,    Reg'(0),    Stack_Size           );
+   fxR'( Op_CSRR,  Reg'(1),    MHARTID              );
+   fII'( Op_ADDI,  Reg'(1),    Reg'(1),    1        );
+   fMR'( Op_MUL,   Reg'(0),    Reg'(0),    Reg'(1)  );
+   fIR'( Op_ADD,   Reg_SP,     Reg_SP,     Reg'(0)  );
+end;
+
+-- Assembly code for machine mode timer interrupt:
+procedure Timer_Vec with Import, External_Name => "timervec";
+
+function Machine_Status .....
+
+procedure Set_Machine_Status .....
+
+Machine_Status_MPP_Mask: constant .....;
+
+Machine_Status_MPP_S: constant ......;
+
+.....
+
+procedure Boot_Init_SuperSOC
+is
+   Set_Up_Machine_Mode_Stacks_SuperSOC;
+
+   -- set Previous Privilege mode to Supervisor, for MRET
+   Set_Machine_Status 
+      ((Machine_Status and Machine_Status_MPP_Mask) xor Machine_Status_MPP_S);
+
+   .....
+
+   .....
+end;
+```
+
+The whole stack space starts at address `Stacks_Base`. The number of harts in the system is
+`Harts`, and each stack is `Stack_Size` bytes long. So the whole stack space will be `Harts *
+Stack_Size` bytes in size. 
+
+For each hart, `SP` is initialised to one byte past the end of that hart's stack, so its stack
+will grow down into its own space. 
+
+
+
+
 
 
 

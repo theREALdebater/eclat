@@ -1,5 +1,5 @@
 -----------------------------------------------------------------------------------------------
-# Rearrangement (Defragmentation)
+# Defragmenting Pools
 
 A segment (a contiguous stretch of memory storage elements) used to store the heterogeneous pool elements 
 (objects) of a pool is likely to be initially used up by allocating pool elements to ascending 
@@ -22,9 +22,9 @@ _defragmentation_ technique is needed to avoid it (or mitigate it).
 
 
 
-...... abstract limited controlled `Rearrangeable_Pool`, declared in the package 
+...... abstract limited controlled `Defragmenting_Pool`, declared in the package 
 
-????? `AdaOS.Storage_Pools`, 
+????? `AdaOS.Storage.Defragmenting_Pools`, 
 
 derived from `Root_Storage_pool`, .....
 
@@ -47,11 +47,11 @@ type Movements is array (Positive range <>) of Movement;
 ```
 
 
-The procedure `Rearrange` is declared as follows:
+The procedure `Defragment` is declared as follows:
 
 ```ada
-procedure Rearrange (Pool : in out Rearrangeable_Pool;
-                     Work : in out Movements);
+procedure Defragment (Pool : in out Defragmenting_Pool;
+                      Work : in out Movements);
 ```
 
 This procedure .....

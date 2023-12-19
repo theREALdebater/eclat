@@ -9,8 +9,8 @@ A _target_ is the combination of:
  
  * a run time system _variant_
 
-Native machine code will be generated on the assumption of a specific target; an attempt to run 
-it on a different target is likely to fail. 
+Native machine code is generated on the assumption of a specific target; an attempt to run it
+on a different target is likely to fail. 
 
 
 
@@ -27,10 +27,12 @@ Examples of architectures are:
  
  * ARMv8 (AArch64)
 
+ * RISC-V (RISCV)
 
-### Subarchitectures
 
-An architecture can have two or more _subarchitectures_. 
+### Sub-architectures
+
+An architecture can have two or more _sub-architectures_. 
 
 For example the ????? has:
 
@@ -40,16 +42,83 @@ For example the ????? has:
  * Four cores that execute the ????? (?????) ARM instruction set (with
    its accompanying register model, etc.).
 
-In this case, the architecture is ????? and it has two subarchitectures: ?????; ?????.
+In this case, the architecture is ????? and it has two sub-architectures: ?????; ?????.
 
 The machine code being executed by a Thumb core can call subroutines that execute in ?????, and
 vice versa. 
 
-To accommodate this kind of target, different [segments](?????) can be configured to be
-associated with different subarchitectures ......
+To accommodate this kind of target, different [image segments](images.md#seg) can be configured
+to be associated with different sub-architectures ......
 
 
 ......
+
+
+
+
+
+### 
+
+See also: https://en.wikipedia.org/wiki/Uname
+
+    alpha
+
+    arc
+
+    arm
+    aarch64_be (arm64)
+    aarch64 (arm64)
+    armv8b (arm64 compat)
+
+    armv8l (arm64 compat)
+
+    blackfin
+    c6x
+    cris
+    frv
+    h8300
+    hexagon
+    ia64
+    m32r
+    m68k
+    metag
+    microblaze
+    mips (native or compat)
+    mips64 (mips)
+    mn10300
+    nios2
+    openrisc
+    parisc (native or compat)
+    parisc64 (parisc)
+    ppc (powerpc native or compat)
+    ppc64 (powerpc)
+    ppcle (powerpc native or compat)
+    ppc64le (powerpc)
+    s390 (s390x compat)
+    s390x
+    score
+    sh
+    sh64 (sh)
+    sparc (native or compat)
+    sparc64 (sparc)
+    tile
+    unicore32
+    i386 (x86)
+    i686 (x86 compat)
+    x86_64 (x64)
+    xtensa
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 -----------------------------------------------------------------------------------------------

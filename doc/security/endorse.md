@@ -1,9 +1,9 @@
 -----------------------------------------------------------------------------------------------
 # Endorsements
 
-A primitive operation of a [secure object type](security.md#secobj) can be marked with the
-`Endorsed` aspect (being set to `True`), in which case the subprogram is said to be _endorsed_,
-otherwise it is _non-endorsed_. 
+A primitive operation of a [secure object type](security.md#secobj) can have its `Endorsed`
+aspect set to `True`, in which case the subprogram is said to be _endorsed_, otherwise it is
+_non-endorsed_. 
 
 If a subprogram is marked as endorsed, it should make the necessary security checks before
 continuing with the actions of the subprogram. For each call of the subprogram, these checks
@@ -17,6 +17,13 @@ typically most (or all) other operations of the system object will also perform 
 An endorsement ensures that the caller has permission to carry out the operation, and also
 determines whether auditing is required, as well as possibly other qualifications of performing
 the operation. 
+
+The operation is expected to use the cited authority to check that the caller has permission to
+perform the operation it has requested, and possibly also to qualify the execution of the
+operation (for example, activating auditing). 
+
+The operation might use the cited identity in an [audit log](../events/logging.md#aud) relating
+to the call. 
 
 Most (or all) system objects will use a special kind of module, called a
 [guardian](guardians.md), to implement the endorsements specially for it. 
@@ -37,7 +44,7 @@ At the beginning of its execution, every endorsed subprogram that is using a
 
  * create and initialise the appropriate [endorsement context](#cxt); 
  
- * execute the endorsement, using the context; 
+ * execute the endorsement (which will be implemented by the guardian), using the context; 
  
  * examine the results in the endorsement context and act accordingly. 
 
@@ -165,11 +172,11 @@ constructed using values for all of its input properties.
 The procedure `Endorse` endorses the call using the input property values used to construct the
 given `Context`. The output properties of `Context` will be set by the procedure. 
 
-This procedure is abstract so it must be expected to be overridden. The default implementation
-sets the output properties as follows: 
+This procedure must be expected to be overridden. The default implementation sets the output
+properties as follows: 
 
- * `Is_Permitted` returns `True` if `Caller_Principal` is equal to `Task_Principal.Value`
-   and `Caller_Authority` is equal to `Task_Authority.Value`, or `False` otherwise; 
+ * `Is_Permitted` returns `True` if `Caller_Principal` is equal to `Task_Principal`
+   and `Caller_Authority` is equal to `Task_Authority`, or `False` otherwise; 
 
  * `Must_Audit` returns `False`; 
 
@@ -182,7 +189,8 @@ on whether the ......
 
 
 
-...... should use the value returned by the function `Caller_Principal` to add information to, for example, log messages
+...... should use the value returned by the function `Caller_Principal` to add 
+information to, for example, log messages
 to help identify who or what was initiating the .......
 
 

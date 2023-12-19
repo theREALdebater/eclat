@@ -90,9 +90,9 @@ The payload of the section is an _encoded PXC stream_ .....
 
 An encoded PXC stream is a sequence of [nybbles](#nyb).
 
-Each quad of the payload contains 16 nybbles, in big-endian format. The first nybble is in the 
-upper nybble of the most significant byte. The most significant byte is first (the one at 
-offset 0 from the beginning) of the quad. The nybbles immediately fllowing those in a quad are 
+Each quad of the payload contains 16 nybbles, in big-endian format. The first nybble is in the
+upper nybble of the most significant byte. The most significant byte is first (the one at
+offset 0 from the beginning) of the quad. The nybbles immediately following those in a quad are
 those in the immediately following quad. 
 
 
@@ -483,7 +483,7 @@ This tuple would be encoded as the number 23 followed by the number 46
 
 ### Array {#arr}
 
-An _array literal_ is a sequence of expressions with a length prededing it .....
+An _array literal_ is a sequence of expressions with a length preceding it .....
 
 
 
@@ -557,7 +557,7 @@ is the exact equivalent of the following four declarations:
 -----------------------------------------------------------------------------------------------
 ## Formulas {#form}
 
-PXCML supports the simplest kinds of _formula_ that will be very familar. 
+PXCML supports the simplest kinds of _formula_ that will be very familiar. 
 
 Unlike in normal programming languages, in PXCML a formula is always static, meaning that its value can be 
 calculated at load time. 
@@ -740,7 +740,7 @@ Then there is a definition named `apple_counter`, whose value is 46 (double 23).
 ## Tag Decorations {#tag}
 
 A [definition](#def) or an [expression](#expr) can be _decorated_ with one or more _tags_. The 
-tag or tags are placed immediately before the defintiion or expression. If there are two or 
+tag or tags are placed immediately before the definition or expression. If there are two or 
 more, the order in which they are written is unimportant. 
 
 .....
@@ -1004,7 +1004,7 @@ constraints of the semantics of subroutines. There is no way that this subroutin
 be implemented as a normal subroutine. In particular, when a jump is evaluated it never 
 returns, as such. 
 
-Nevertheless, its semantics are simple enough to understand, and this is a funcdamentally 
+Nevertheless, its semantics are simple enough to understand, and this is a fundamentally
 important subroutine. 
 
 The jump subroutine is called as follows:
@@ -1092,7 +1092,7 @@ A task can be dehydrated and rehydrated
 
 
 
-The Ada attributes `Read_And_Resume` and `Suspend_And_Write`
+The Ada properties `Read_And_Resume` and `Suspend_And_Write`
 
 
 
@@ -1961,12 +1961,12 @@ An external definition has an entry for it added to the
 ????? should be programming language independent
 
 
-PXC assembly is actually expressed with Ada source in the form of qualified expressions, as 
+PXC partition is actually expressed with Ada source in the form of qualified expressions, as 
 described in [13.8 Machine Code Insertions][1] of the Ada Reference Manual. 
 
 .....
 
-For example, the following shows the declaration of a procedure which contains PXC assembly:
+For example, the following shows the declaration of a procedure which contains PXC partition:
 
 ```ada
 with System.Machine_Code;

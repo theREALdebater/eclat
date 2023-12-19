@@ -12,11 +12,11 @@ is
 -----------------------------------------------------------------------------------------------
 --/ Startpoints:
 
-   type Program_Assembly is abstract limited new System_Object with private;
+   type Program_Partition is abstract limited new System_Object with private;
 
-   type Assembly_Access is access all Program_Assembly'Class;
+   type Partition_Access is access all Program_Partition'Class;
 
---| A _program assembly_ is roughly equivalent to a tradtional executable (file or program). 
+--| A _program partition_ is roughly equivalent to a tradtional executable (file or program). 
 
 --\
 -----------------------------------------------------------------------------------------------
@@ -24,18 +24,18 @@ is
 
 --| 
 
-   function Name (Startpoint: in Program_Assembly) return Wide_String is abstract;
+   function Name (Startpoint: in Program_Partition) return Wide_String is abstract;
 
 --| The function `Name` returns the full name of a program startpoint, which should (as far as is
 --| practicable) uniquely identify the startpoint (to a human). It should include the startpoint's
 --| version (but not its revision). this name is not intended to be the file name of the 
 --| ?????.
 
-   ????? function Form (Startpoint: in Program_Assembly) return Wide_String is abstract;
+   ????? function Form (Startpoint: in Program_Partition) return Wide_String is abstract;
 
-   ????? function UMID (Startpoint: in Program_Assembly) return Wide_String is abstract;
+   ????? function UMID (Startpoint: in Program_Partition) return Wide_String is abstract;
 
-   function Description (Startpoint: in Program_Assembly) return Wide_String is abstract;
+   function Description (Startpoint: in Program_Partition) return Wide_String is abstract;
    
 --| ?????
 
@@ -60,14 +60,14 @@ is
 --| the program units that the startpoint contains, in an order that is consistent with the 
 --| depndencies between them. 
 
-   type Assembly_Body_Procedure is access procedure;
+   type Partition_Body_Procedure is access procedure;
 
---| The type `Assembly_Body_Procedure` represents (a remote access value referencing) a body 
+--| The type `Partition_Body_Procedure` represents (a remote access value referencing) a body 
 --| procedure. 
 
-   function Body_Procedure (Startpoint: in Program_Assembly) 
+   function Body_Procedure (Startpoint: in Program_Partition) 
    return 
-      Assembly_Body_Procedure is abstract;
+      Partition_Body_Procedure is abstract;
 
 --| The function `Body_Procedure` returns (a remote access value referencing) the body 
 --| procedure of a given startpoint. 
@@ -78,7 +78,7 @@ is
 
 --| 
 
-   function Program (Startpoint: in Program_Assembly) return Program_Access is asbtract;
+   function Program (Startpoint: in Program_Partition) return Program_Access is asbtract;
 
 --| 
 

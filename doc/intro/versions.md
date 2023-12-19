@@ -56,12 +56,49 @@ number 4.
 
 .....
 
+The following package is declared: 
+
+```ada
+package AdaOS.Versions
+is
+   type Part is (Major, Minor, Patch, Iteration);
+
+   type Number is mod 2**32;
+
+   type Compatibility_Version is array (Part range Major .. Minor) of Number;
+
+   type Full_Version is array (Part) of Number;
+
+   function Compat (Version: in Full_Version) return Compatibility_Version;
+end;
+```
+
 
 
 
 -----------------------------------------------------------------------------------------------
-## 
+## Versioned Packages
 
+A _versioned package_ .....
+
+.....
+
+A versioned package always has a visible parameterless function which returns the type
+`Full_Version`, declared as follows: 
+
+```ada
+function Version return Full_Version with Inline;
+```
+
+It is usually declared 'inline', and simply returns a static value. 
+
+This function returns the version of the package 
+
+
+
+
+
+.....
 
 
 

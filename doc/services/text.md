@@ -31,6 +31,35 @@ and deserialise according to that encoding.
 
 
 
+
+The package `AdaOS.Text` contains the following declarations: 
+
+```ada
+type Text_Serializer is limited interface and System_Object;
+
+function New_Reader (Serializer: not null access Text_Serializer) 
+return
+   Ada.Text_IO.File_Access is abstract; -- mode In_File
+
+function New_Writer (Serializer: not null access Text_Serializer) 
+return
+   Ada.Text_IO.File_Access is abstract; -- mode Out_File or Append_File
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 -----------------------------------------------------------------------------------------------
 ## Textifiers
 

@@ -4,18 +4,40 @@
 A _system object_ is an AdaOS entity that has state and behaviour. These are the very objects
 of the 'AdaOS' semi-acronym, short for 'Ada Object System'. 
 
-A system object is represented by an object (an Ada object) of a type derived from the task
+A system object is represented by an object (an Ada object) of a type derived from the limited
 interface type `System_Object`, which is declared in the package `AdaOS.Objects`. 
+
+```ada
+
+type System_Object is limited interface and System.Security.Secure_Object;
+```
 
 The package `AdaOS.Objects` is categorised as a [remote types][1] library unit. The type
 `Object_Access`, declared in this package, designates `System_Object'Class`, and is therefore a
 remote access type. 
 
+Before a system object can be used, it generally has to be [engaged](../security/engaging.md). 
+
+Collections of system objects can be kept in [object containers](objcont.md). 
+
+This section describes how the majority of system objects behave. Those types of system object
+that deviate from this norm must carefully document how they differ, and how they should be
+used. 
+
+
+
+-----------------------------------------------------------------------------------------------
+## System Object Owner {#own}
+
 System objects are [secure objects](../security/security.md#secobj). 
 
-Before a system object can be used, it generally has to be [engaged](engaging.md). 
+Every system object therefore has a read-only property `Owner`. 
 
-Collections of system objects can be kept in an [object container](objcont.md). 
+```ada
+function Owner (Object: not null access System_Object) 
+return
+   access Security_Principal'Class is asbtract;
+```
 
 
 
@@ -97,12 +119,11 @@ For more information see .....
 
 
 -----------------------------------------------------------------------------------------------
-## Object Identifiers and Domains {#oid}
+## Object Identifiers {#oid}
 
-An _object domain_ is a conceptual entity that contains a set of saved states. 
-
-Every saved state is permanently associated with one _object identifier_, or _OID_, that
-uniquely identifies the state within an object domain, permanently and forever. 
+Every [saved state](#state) is permanently associated with one _object identifier_, or _OID_,
+that uniquely identifies the state within a [domain](../security/domains.md), permanently and
+forever (in effect). 
 
 An OID is a small opaque token (value) of a fixed size. 
 
@@ -147,28 +168,19 @@ when the system object is loaded propagates the exception `Status_Error`.
 Setting the OID of a vacant system object when its loader has (already) been set causes an
 immediate automatic load of the system object. 
 
-..... [Object Identifier Allocation](alloc.md) .....
+..... [Object Identifier Allocation](alloc.md#oid) .....
 
 
-### Domain Identifiers
-
-Every object domain is globally, permanently, and forever identified by a _domain identifier_. 
-
-A domain identifier is an opaque token, but it is not of a fixed size. Instead, it is a bit array ......
-
-..........
-
-
-A _cross-domain link_ is a [link](#link) whose target is an object in a different domain. 
 
 ........
 
+An _object set_ is a set of object identifiers, and is represented by the type
+`Object_Sets.Set`. The package `Object_Sets` is declared in the package `AdaOS.Objects`: 
 
+```ada
 
-
-
-
-
+package Object_Sets is new Ada.Containers.Sets (Object_Id);
+```
 
 
 
@@ -193,11 +205,12 @@ type) can take that same state again.
 .....
 
 How the persistence of a particular type of system object is achieved is not carved in stone,
-but it will normally involve its state being stored somewhere (for example, in a file). In this
-stored form, the state is called a _saved state_. The saved state can be read, at a later time,
-in order to restore a system object to that state. 
+but it will normally involve its state being stored somewhere. In this stored form, the state
+is called a _saved state_. The saved state can be read, at a later time, in order to restore a
+system object to that state. 
 
-If the state is saved into a file, the file is called a _saved state file_. 
+Very often the state is saved into a file, in which case the file is called a
+[saved state file](../config/config.md#state). 
 
 ......
 
@@ -216,7 +229,6 @@ represent a single saved state at any one point in time.
 ......
 
 ```ada
-
 function Is_Loaded (Object: not null access System_Object) return Boolean is abstract;
 ```
 
@@ -238,7 +250,6 @@ object is blocked until the system object becomes loaded.
 All system objects implement procedures `Save`, `Load`, `Create` and `Delete`. 
 
 ```ada
-
 procedure Save (Object: not null access System_Object;
                 Stream: not null access Root_Stream_Type'Class) is abstract;
 ```
@@ -255,7 +266,6 @@ See [Configuration](../intro/config.md) for more information as to how to write 
 into a stream, as well as how to be able to create and update saved state files. 
 
 ```ada
-
 procedure Load (Object: not null access System_Object;
                 Stream: not null access Root_Stream_Type'Class) is abstract;
 ```
@@ -267,8 +277,8 @@ read from a given stream. Then the object is changed to being loaded (function `
 return `True`).
 
 ```ada
-
-procedure Create (Object: not null access System_Object) is abstract;
+procedure Create (Object: not null access System_Object;
+                  Owner:  not null access Security_Principal'Class) is abstract;
 ```
 
 The procedure `Create` causes a vacant system object to become loaded, initialised with a
@@ -280,8 +290,11 @@ return `True`).
 
 The default state will depend on the type of the system object. 
 
-```ada
+The owner of the new saved state will be `Owner`. If the given `Owner` is not the same as or an
+inferior principal of the calling task's owner, then the exception `Security_Violation` is
+propagated (and a new saved state is not created). 
 
+```ada
 procedure Delete (Object: not null access System_Object) is abstract;
 ```
 
@@ -305,9 +318,9 @@ For a loaded system object to become vacant, it must either be saved (by a call 
 
 ### Loaders and Savers
 
-A system object has, as properties, a _loader_ and/or a _saver_; their values are access
-values, so each can be null to indicate that it is not set; this (being not set) is the
-default. 
+A system object has, as properties, a _loader_ and/or a _saver_; their values are access-to-
+subprogram values, so each can be null to indicate that it is not set; this (being not set) is
+the default. 
 
 Each loader and saver is a function that returns (an access value that references) a stream,
 given an object identifier. For a saver, the stream is an output stream that can be written
@@ -392,14 +405,80 @@ If the object is vacant, finalisation need not do anything.
 
 
 -----------------------------------------------------------------------------------------------
-## 
+## Engagement {#eng}
+
+A system object is a [secure object](../security/security.md#secobj), so it is
+[engaged](../security/engaging.md) the same way that a security object is engaged, but .....
+
+Calling the procedure `Engage` should:
+
+ 1. If the system object is vacant and its load controller has been set, the load controller
+    should be called, and, if the result is not null, the object should use the returned stream
+    to load the system object and then proceed as below; 
+
+ 2. If the system object is vacant but its load controller has not been set, propagate the
+    exception `Status_Error`; 
+
+ 3. In all cases, proceed as for a secure object. 
+
+.....
 
 
 
 
 
 -----------------------------------------------------------------------------------------------
-## 
+## Current Transaction {#tran}
+
+Every [engagement](../security/engaging.md#engagement) of a system object is associated with a
+reference to a [transaction](../intro/trans.md). This reference is called the _current
+transaction_ of the system object. It can be null. If the current transaction is null, there is
+_no current transaction_. 
+
+All actions performed by the system object on behalf of the calling task within that engagement
+are performed in the context of the (transaction referenced by the) current transaction, if
+there is one. 
+
+In other words, any change made to the system state by the system object on behalf of the
+calling task within that engagement is linked to the current transaction, if there is one. 
+
+.....
+
+Every system object has a [property](../intro/intro.md#prop) named `Transaction` which
+represents the current transaction of the system object. 
+
+When a system object is created or loaded, the current transaction is initially `null`. 
+
+The current transaction is associated with an *engagement*, and so when the engagement is
+terminated, the current transaction automatically becomes `null`. If this happens, it does not
+mean that the transaction controller object itself is finalised (or affected in any way), and
+so it does not trigger an automatic abort of the transaction (nor does it trigger the
+transaction to perform any other kind of action). 
+
+Thus, the current transaction of a system object is always `null` whenever the system object is
+not engaged. To be pedantic, the current transaction of a system object is always `null`
+whenever the system object is vacant. 
+
+The package `AdaOS.Objects` contains the following declarations: 
+
+```ada
+function Transaction (Object: in out System_Object) 
+is
+   access Transaction_Controller'Class is asbtract;
+
+procedure Set_Transaction (Object:      in out System_Object; 
+                           Transaction: access Transaction_Controller'Class)
+is asbtract;
+```
+
+The function `Transaction` returns `null` if there is no current transaction for the given
+`Object`. Otherwise, it returns (an access value referencing) the current transaction. 
+
+.....
+
+
+
+????? Is a transaction a system object? If so, what does its current transaction mean? Its super-transaction?
 
 
 

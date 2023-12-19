@@ -2,8 +2,8 @@
 # General Resource Name Resolvers
 
 A __General Resource Name Resolver__ (or __GRNR__, pronounced 'garnerer') is a kind of service
-that can be given a [GRL](#grl) string, and will then return a [system
-object](../objects/objects.md) that represents a [general resource](#genrsc). 
+that can be given a [GRL](#grl) string, and will then return a 
+[system object](../objects/objects.md) that represents a [general resource](#genrsc). 
 
 .....
 

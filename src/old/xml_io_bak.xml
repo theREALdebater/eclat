@@ -1,0 +1,170 @@
+<?xml version="1.1"?>
+<book xsi:schemaLocation="docbook.xsd">
+
+
+
+
+
+
+
+<section>
+
+<title>Namespaces and Qualified Names</title>
+
+<para>The type <code>Namespace_Ref</code> acts as a token for a
+<firstterm>namespace</firstterm> within the document. A namespace is universally identified by
+its <firstterm>name</firstterm>, which is intended to be a Uniform Resource Indicator (URI).
+
+</para>
+
+<fragment>
+   <title>Namespaces</title>
+   <path>
+      <name>XML_IO package specification</name>
+      <name>Namespaces</name>
+   </path>
+</fragment>
+
+<para>The function <code>Name</code> returns the name of a namespace. Two namespaces with names
+<code>N1</code> and <code>N2</code> are equal if and only if <code>N1=N2</code>.</para>
+
+<para>The constant <code>Null_Namespace_Ref</code> is used to represent ???
+
+</para>
+
+<para>The function <code>Namespace</code> returns either a reference to the namespace which has
+the name <code>Name</code>, or the value <code>Null_Namespace_Ref</code> if no such namespace
+has been declared anywhere within the document <code>Document</code>.</para>
+
+<fragment>
+   <title>Qualified names</title>
+   <path>
+      <name>XML_IO package specification</name>
+      <name>Qualified names</name>
+   </path>
+</fragment>
+
+<para>
+
+</para>
+
+
+
+</section>
+
+
+
+
+
+
+
+
+
+
+<section>
+
+<title>Reading and Writing an XML Document</title>
+
+
+
+<fragment>
+   <title>Reading and writing a document</title>
+   <path>
+      <name>XML_IO package specification</name>
+      <name>Reading and writing a document</name>
+   </path>
+</fragment>
+
+<para>The procedure <code>Read</code> reads and interprets a complete XML document from
+<code>File</code> into memory, and sets <code>Dcoument</code> as a reference to the input
+document. This procedure can read a standlone XML document, or it can read a document that is
+preceded by a DTD (document type declaration). If a DTD is provided, the XML document is
+checked for validity (in addition to well-formedness). The procedure referred to by
+<code>Opener</code> is used to open any text files which are referred to as parsed entities (in
+the main document or another parsed entity); the procedure <code>Ada.Text_IO.Close</code> is
+always used to close such files.</para>
+
+<para>If <code>File</code> is not open for input, the exception <code>Mode_Error</code> is
+raised. The procedure <code>Read</code> uses the subprograms of <code>Ada.Text_IO</code> to
+perform input of characters; any exception raised by one of these subprograms is immediately
+propagated (regardless of the value of <code>On_Error</code>).</para>
+
+<para>If any error occurs while interpreting or checking the XML document (or DTD), the action
+taken depends on <code>On_Error</code>: if it is <code>Exception_Only</code>, the exception
+<code>XML_Error</code> is raised; if it is <code>Report_Only</code>, a description of the error
+is written to <code>Ada.Text_IO.Current_Error</code>, and the error is ignored if possible;
+<code>Report_and_Exception</code> causes a description to be written to
+<code>Ada.Text_IO.Current_Error</code> and then the exception <code>XML_Error</code> to be
+raised; <code>Ignore</code> causes the error to be ignored if possible (no exception is raised,
+and no description written). If an error cannot be ignored, <code>XML_Error</code> is raised;
+note that when certain errors are ignored, subsequent behaviour could include the loss of
+significant portions of data, and it could include one or more knock-on errors.</para>
+
+<para>The procedure <code>Write</code> writes out the given <code>Document</code> as XML. It is
+written as a standalone document (there is no accompanying DTD), with XML version indicated as
+<quote>1.1</quote></para>
+
+<para>The reason why <code>Read</code> is able to interpret and check a DTD, but
+<code>Write</code> only outputs a standalone document is that the principal purpose of a DTD is
+to enable software to check the validity of the accompanying XML document. Since the XML being
+read might have been originated (authored) by a human, this checking may be useful (in
+addition, omitted attributes will be set to their default values according to the DTD).
+However, the XML being written out by the program using <code>XML_IO</code> is already
+implicitly checked for validity, since it is assumed that the program logic will only generate
+a valid document structure before outputting it (and all attributes will be explicitly
+output).</para>
+
+<para>The character set supported by <code>XML_IO</code> is
+<code>Standard_Wide_Character</code>, which corresponds to the (16-bit) Basic Multilingual
+Plane (BMP) of the ISO/IEC 10646 Universal Character Set (UCS). This standard is closely
+tracked by the Unicode character set (they may be considered identical for most purposes).
+</para>
+
+<para>If a character reference indicates a character outside this set (in other words, one
+whose code point is greater than 65535), the <code>Read</code> procedure repsonds with an error
+action (according to <code>On_Error</code>).</para>
+
+</section>
+
+
+
+
+
+<section>
+
+<title>Text Fragments</title>
+
+<para>
+
+</para>
+
+<para><code>XML_IO</code> departs in a minor way from the XML standard, in that text which
+could contain line breaks is not primarily returned in the form of a string with the LF
+control character inidcating line breaks (the canonical form). Instead, such text is returned
+as the type <code>Text_Fragment</code>, which is an opaque type that exposes multiple lines
+explicitly.</para>
+
+<fragment>
+   <title>Text fragments</title>
+   <path>
+      <name>XML_IO package specification</name>
+      <name>Text fragments</name>
+   </path>
+</fragment>
+
+<para>This is done for two reasons. Firstly, it avoids the use of any character to indicate
+line breaks. The use of a character to indicate line breaks can be error prone, due to the fact
+that there are many conventions as to which characters to use for this purpose. Second, if the
+program processes multi-line text values in a way that requires random access to indivdual
+lines, a value of the type <code>Text_Fragment</code> will be especially convenient and
+efficient (much more so than a string in the canonical form); a value of the type
+<code>Text_Fragment</code> can be efficiently constructed while reading an XML document.</para>
+
+<para>The convenient function <code>???</code> converts a value of the type
+<code>Text_Fragment</code> into a string (of the type <code>Wide_String</code>) in the
+canonical form.</para>
+
+</section>
+
+
+</book>

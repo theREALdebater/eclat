@@ -9,6 +9,9 @@ For all the nodes except the last node in the sequence, the node is (or should b
 identification of a [directory](containers.md#dir). A directory is a container of other system
 objects. Each object it contains is identified, within the directory, by a unique name. 
 
+For all the nodes except the first one, each node is a member of the node preceding it in the
+sequence. 
+
 .....
 
 There are three kinds of path: 
@@ -42,7 +45,7 @@ but in essence a path identifies a file.
 
 For a URL, a path identifies a [resource](../services/garnerers.md#genrsc), which is like a
 file, but a bit more abstract. For example, a resource's content might be generated dynamically
-at the moment of GETting it. 
+at the moment of GET-ting it. 
 
 The syntax rules for URL paths are slightly different, and defined in a series of [RFCs](?????).
 
@@ -80,8 +83,9 @@ turn is essentially based on the Universal Character Set (UCS) defined by ISO-10
 itself, in practice, based on the [Unicode](http://www.unicode.org) industry standard. 
 
 However, this type is defined as a separate type (rather than just a subtype), because it may
-well make sense in some situations to define it differently. See [Path Strings and
-Syntax](#path) for more on this. 
+well make sense in some situations to define it differently. 
+
+See [Path Strings and Syntax](#syn) for more on this. 
 
 There are conversion functions between node names and the standard strings, as well as between
 path strings and node names: 
@@ -169,7 +173,7 @@ These may be treated specially by some kinds of software.
 
 
 -----------------------------------------------------------------------------------------------
-## Path Strings and Syntax {#path}
+## Path Strings and Syntax {#syn}
 
 
 
@@ -218,7 +222,7 @@ These are a bit wordy but make it easy to deal with standard strings in conjunct
 strings. 
 
 
-### Path Syntax {#syn}
+### Path Separators {#pathsep}
 
 A _path separator_ is 
 
@@ -249,8 +253,8 @@ The following package is visibly declared in the package `AdaOS`:
 package Path_Vectors is new Ada.Containers.Indefinite_Vectors (Positive, Node_Name);
 ```
 
-The type `Path_Vectors.Vector` represents a path expressed as a sequence of [node
-names](#name). 
+The type `Path_Vectors.Vector` represents a path expressed as a sequence of 
+[node names](#node). 
 
 .....
 
@@ -286,14 +290,16 @@ needed. The separator is not permitted to be a space or have any spaces in it.
 .....
 
 
-### Absolute and Relative Paths {#absrel}
+
+-----------------------------------------------------------------------------------------------
+## Absolute and Relative Paths {#absrel}
 
 There is a long-standing concept, popularised by the Unix operating system, of _absolute 
 paths_ and _relative paths_. 
 
 These concepts are tied to the concepts of: there being a single _root directory_, which never
-changes, for an entire file (or object) hierarchy; there being a [current working
-directory](../adaos/compart.md#cwd) or _CWD_, which is (the root directory itself or) one of
+changes, for an entire file (or object) hierarchy; there being a 
+[current working directory](#cwd) or _CWD_, which is (the root directory itself or) one of
 the directories in the root directory's hierarchy, and can change dynamically. 
 
 An absolute path is a path that is relative to the root directory. 
@@ -312,19 +318,23 @@ Whereas this is a relative path:
     bar/hum
 
 
-### URLs {#url}
+
+-----------------------------------------------------------------------------------------------
+## URLs {#url}
 
 The syntax for a universal resource locator is .....
 
 However, the [URL garnerer](../services/garnerers.md#url) has a slightly more lax syntax:
 
- * the space character is permitted in a URL, in which case the resolver itself translates it 
-   into the `%20` form that it should have; 
+ * the space character is permitted in a URL, in which case the resolver itself effectively
+   translates it into the `%20` form that it should have; 
 
  * .....
 
 
-### Host Filesystem Paths
+
+-----------------------------------------------------------------------------------------------
+## Host Filesystem Paths
 
 The syntax for a host file system path is defined by the host platform or operating system. 
 
@@ -388,7 +398,9 @@ No escape mechanism is provided for this substitution, per se, but in a URL path
 could be used. 
 
 
-### Environment Variable Substitutions
+
+-----------------------------------------------------------------------------------------------
+## Environment Variable Substitutions
 
 .........
 
@@ -412,7 +424,7 @@ substitutions allow the `%V%` and `${V}` substitutions to be prevented.
 
 
 
-After environment variables have ben substituted by their values, then all other mappings (as
+After environment variables have been substituted by their values, then all other mappings (as
 described in this section) are subsequently applied. 
 
 .....
@@ -420,159 +432,444 @@ described in this section) are subsequently applied.
 
 
 
+-----------------------------------------------------------------------------------------------
+## Current Working Directory {#cwd}
+
+A [compartment](../adaos/compart.md#cwd) maintains a property `Current_Directory` which is its
+_current working directory_, or _CWD_. 
+
+This is an absolute path of a [directory](../objects/containers.md#dir) to which the
+compartment has access [permission](../security/security.md#perm). 
+
+Any use by the (program executing within the) compartment of a 
+[relative path](../objects/paths.md#absrel) is a way to specify a path relative to the CWD, .....
+
+.....
+
+
+
+
+### Shell Commands
+
+[Allegra](?????) defines commands related to the CWD and the working directory
+stack. 
+
+Allegra (not the compartment) maintains a _working directory stack_, which is a vector (a
+dynamically resizing array) of the saved paths of working directories. 
+
+Here are the main commands, and a brief description of what they do: 
+
+    pwd
+    
+Prints the absolute path of the CWD onto the current output. 
+
+    cd P
+
+Changes the CWD to path `P` (absolute or relative). 
+
+    push P
+    
+Pushes (appends) the current path of the CWD onto (end of) the working directory stack, and
+then changes the CWD to path `P`. 
+
+    pop
+    
+Pops (fetches and then deletes) a path off the top (end) of the working directory stack and
+changes the CWD to that path. 
+    
+
+
+
+
+
+
+
+### Ada
+
+.....
+
+```ada
+with Ada.Text_IO, AdaOS.Instances;
+use  Ada.Text_IO, AdaOS.Instances;
+procedure Main
+is
+   CWD: access Object_Directory := Task_Instance.Compartment.Current_Directory;
+begin
+   CWD.Engage;
+   Put_Line (CWD.Path);
+   CWD.Disengage;
+exception
+   when others =>
+      if CWD /= null then CWD.Disengage; end if;
+      raise;
+end;
+```
+
+.....
+
+```ada
+with Ada.Text_IO, Ada.Directories;
+procedure Main
+is
+   Ada.Text_IO.Put_Line (Ada.Directories.Current_Directory);
+end;
+```
+
+
+
+.....
+
+```ada
+
+
+
+```
+
+.....
+
+```ada
+
+
+
+```
+
+
+
+
+
+
 
 
 
 -----------------------------------------------------------------------------------------------
-## ?????
+## Temporary Files Directory {#temp}
 
-..... [package installation](packaging.md#inst) .....
+The environment variable `TMPDIR` contains the full, absolute path of the _temporary files
+directory_. 
+
+The environment variable `TMPDIR` contains the [absolute full path](../objects/paths.md) of a
+directory that can be used to create named system objects. 
+
+When this environment variable is set, the temporary directory is changed to be the directory
+indicated by resolving the value to which the variable is set. If the value cannot be resolved
+to an object that is a directory, and to which the compartment has full permission, the
+exception `AdaOS.Usage_Error` is propagated (and the variable is not changed). 
+
+The environment variables `TEMP`, `TEMPDIR`, and `TMP` are links to `TMPDIR` and so are an an
+alias of it. Any of these variables can be retrieved and set. When any one is set to a
+particular value, all will be automatically set to that value. 
+
+On a [hosted platform](../pxcr/targets.md#plat), what the .....
+
+The value of this variable is typically:
+
+| Platform        | Directory                               |
+| --------------- | --------------------------------------- |
+| Windows         | `C:\Users\%USER%\AppData\Roaming`       |
+| Linux/FHS       | `/tmp`                                  |
+| AdaOS Native    | `/tmp`                                  |
+
+where `%USER%` is the value of the environment variable `USER`, and `${HOME}` is the value of
+the environment variable `HOME`. These values may vary. 
+
+
+### Function `New_Temporary_Directory`
+
+For convenience, the package `AdaOS.Objects` contains the following visible
+declarations: 
+
+```ada
+function New_Temporary_Directory (
+   Ambit:       in     Security.Security_Ambit;
+   Prefix:      in     Wide_Wide_String := "";
+   Controller:  in out Transaction_Controller'Class := Task_Transaction;
+   Compartment: in out Program_Compartment'Class := Task_Instance.Compartment.all)
+return
+   not null access Object_Directory'Class;
+
+function New_Temporary_Directory (
+   Prefix:      in     Wide_Wide_String := "";
+   Controller:  in out Transaction_Controller'Class := Task_Transaction;
+   Compartment: in out Program_Compartment'Class := Task_Instance.Compartment.all)
+return
+   not null access Object_Directory'Class;
+```
+
+The function `New_Temporary_Directory` creates a new general-purpose directory object and
+returns (an access value referencing) the new object. 
+
+Full permissions on the new object are granted to all the authorities in the given `Ambit`. 
+
+The overloading without an `Ambit` parameter assumes the ambit of the given `Compartment`,
+which itself has a default of the calling task's compartment. 
+
+The new directory object must be engaged before any of its other operations can be carried out,
+and it *MUST* be disengaged afterwards. 
+
+Each new directory is a member of the temporary files director, with a randomly generated
+name---prefixed by the given `Prefix`---that is guaranteed to be unique within the temporary
+files directory. 
+
+
+### Function `Create_Temporary_Directory`
+
+For (even more :-) convenience, the non-standard extension package `Ada.Directories.Temporary`
+contains the following visible declarations: 
+
+```ada
+function Create_Temporary_Directory (Prefix: in String := "") return String;
+function Create_Temporary_Directory (Prefix: in Wide_String := "") return Wide_String;
+function Create_Temporary_Directory (Prefix: in Wide_Wide_String := "") return Wide_Wide_String;
+```
+
+The function `Create_Temporary_Directory` creates a new general-purpose directory and returns
+its full absolute path.
+
+Internally, this function calls `AdaOS.Objects.Create_Temporary_Directory` (the overloading
+without the `Ambit` parameter) with all the defaults for its parameters. 
+
+
+### Deletion of Temporary Directories
+
+Whichever part of a program it is that creates a temporary directory should delete the
+directory when finished with it. 
+
+If the creation of the directory is under the control of a [transaction](../intro/trans.md),
+and the transaction is abandoned, then the directory will be automatically deleted. 
+
+Otherwise, the program needs to ensure that the directory gets deleted in the case of an
+exception truncating normal execution. 
+
+
+### Purging
+
+The AdaOS system maintenance Kronos job, loads the Allegra script
+`/adaos/local/system-maintenance.allegra`, and runs its `perform-system-maintenance` procedure
+regularly (every 5 minutes, by default). 
+
+By default, the `perform-system-maintenance` procedure calls a procedure named
+`purge-temp-directory`, which by default is defined as follows:
+
+```allegra
+
+procedure 'purge-temp-directory' is
+   for f in (list "/tmp/*") loop
+      if (((f) last-modified) < ((clock) - (1 * (seconds-per-day)))) then
+         delete (f)
+      end if
+   end loop
+end procedure
+```
+
+This version of the procedure simply deletes any subdirectory that is older than one day. 
+
+You can modify this procedure (indeed, the whole script) to suit your preferences or
+requirements. Whenever `/adaos/local/system-maintenance.allegra` is modified, Kronos
+automatically reloads it. 
+
+
+
+-----------------------------------------------------------------------------------------------
+### Crash-Dump Files Directory {#dump}
 
 .....
 
-These locations are stored in [environment variables](../rts/envvars.md), so that programs do
+
+### Purging
+
+The AdaOS system maintenance Kronos job, loads the Allegra script
+`/adaos/local/system-maintenance.allegra`, and runs its `perform-system-maintenance` procedure
+regularly (every 5 minutes, by default). 
+
+By default, the `perform-system-maintenance` procedure calls a procedure named
+`purge-dump-directory`, which by default is defined as follows:
+
+```allegra
+
+procedure 'purge-dump-directory' is
+   for f in (list "/adaos/dump/*") loop
+      if (((f) last-modified) < ((clock) - (7 * (seconds-per-day)))) then
+         delete (f)
+      end if
+   end loop
+end procedure
+```
+
+This version of the procedure simply deletes any subdirectory that is older than one week. 
+
+You can modify this procedure (indeed, the whole script) to suit your preferences or
+requirements. Whenever `/adaos/local/system-maintenance.allegra` is modified, Kronos
+automatically reloads it. 
+
+
+
+-----------------------------------------------------------------------------------------------
+## Home Directory {#home}
+
+Every [principal](../security/security.md#princ) has a directory associated with it (or him or 
+her) called the principal's _home directory_, which contains all (or nearly all) the data 
+associated with that principal. 
+
+
+### Linux
+
+On the Linux platform, the environment variable `HOME` contains the full absolute path of the
+home directory of the current user. 
+
+
+### Windows
+
+On the Microsoft Windows platform, the environment variables `HOMEDRIVE` and `HOMEPATH` are
+used instead of `HOME`. `HOMEDRIVE` contains the drive letter of the home directory, followed
+by a `:` colon character. `HOMEPATH` contains the remainder of the absolute path of the home
+directory (including the initial `\` backslash character). 
+
+......
+
+
+### AdaOS Native
+
+On the AdaOS Native platform, the environment variable `HOME` contains the full absolute path
+of the home directory of the owner of the calling task's [compartment](../adaos/compart.md). 
+
+It should be noted that the value of `HOME` will always be `/`, in reality. 
+
+
+
+
+
+
+
+
+
+
+
+### ?????
+
+[Program Shared Directory](#progshar)
+
+[Module Shared Directory](#modshar)
+
+
+
+
+
+
+
+
+
+
+
+
+-----------------------------------------------------------------------------------------------
+## System Root Directory {#sysroot}
+
+
+
+
+### Linux
+
+
+
+### Windows
+
+There is a specially declared abstract type representing compartments of the 
+[Windows platform](?????) .....
+
+The package `AdaOS.Compartments.Microsoft_Windows` includes the following visible declarations: 
+
+```ada
+
+type Windows_Compartment is abstract limited new Program_Compartment with private;
+
+type Storage_Drive_Letter is new Character range 'A' .. 'Z';
+
+function System_Drive (Compartment: in Windows_Compartment) 
+return 
+   Storage_Drive_Letter is abstract;
+
+function Current_Drive (Compartment: in Windows_Compartment) 
+return 
+   Storage_Drive_Letter is abstract;
+
+.....
+
+function Root_Directory (Compartment: in Windows_Compartment;
+                         Drive:       in Storage_Drive_Letter) 
+return 
+   access Object_Directory'Class;
+
+overriding
+function Root_Directory (Compartment: in Windows_Compartment) 
+return 
+   access Object_Directory'Class;
+```
+
+The function `Root_Directory` has an overloading that takes an in-parameter, `Drive`, indicating the
+drive ..... The overloading without the `Drive` parameter assumes the system drive. 
+
+
+### AdaOS Native
+
+..... the system root directory is always the same object as the home directory .....
+
+
+
+
+
+
+
+-----------------------------------------------------------------------------------------------
+## 
+
+
+
+
+
+-----------------------------------------------------------------------------------------------
+## 
+
+
+
+
+
+-----------------------------------------------------------------------------------------------
+## 
+
+
+
+
+
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+## Installation Directories {#instdir}
+
+..... [package installation](#inst) .....
+
+.....
+
+These locations are stored in [environment variables](../adaos/envvars.md), so that programs do
 not need to have the locations hard coded. Programs should normally use the values in the
 environment variables, and not make assumptions. 
 
 
-
------------------------------------------------------------------------------------------------
-## Directory for Package Installation specific data {#work}
+### Directory for Package Installation specific data
 
 The environment variable `APPDATA` contains the full, absolute path of the directory for a
-package installation to store files. 
-
-A package installation named `P` should store these files in the following directory:
-
-    ${APPDATA}/P
-
-The value of the environment variable `APPDATA` is typically as follows:
-
-| Platform      | Directory                             |
-| ------------- | ------------------------------------- |
-| Windows       | `C:\Users\%USER%\AppData\Roaming`     |
-| Linux/FHS     | `${HOME}`                             |
-| AdaOS Native  | `/work`                               |
-
-where `%USER%` is the value of the environment variable `USER`, and `${HOME}` is the value of
-the environment variable `HOME`. 
-
-These values may vary.
-
-The expectation is that a user who has installed the same package (with the same package
-installation name) on multiple computer systems will have the same files in `%APPDATA%\P` or
-`${HOME}/P` on all of those computer systems. Whether and how updates to these files are
-propagated to other systems is not currently defined. 
-
-A package installation named `P` should store its user-specific configuration data files in the
-following directory: 
-
-    ${APPDATA}/P/config
-
-Every package installation has the property `State_Directory` for this directory. 
+package installation to [store files](../kantan/kantan.md#work). 
 
 
-
------------------------------------------------------------------------------------------------
-## Directory for Package Installation data specific to System {#local}
+### Directory for Package Installation data specific to System
 
 The variable `LOCALAPPDATA` contains the full, absolute path of the directory for a package
-installation to store files specific to the installation and a computer system. 
-
-A package installation named `P` should store these files in the following directory:
-
-    ${LOCALAPPDATA}/P
-
-The value of the environment variable `LOCALAPPDATA` is typically as follows:
-
-| Platform      | Directory                             |
-| ------------- | ------------------------------------- |
-| Windows       | `C:\Users\%USER%\AppData\Local`       |
-| Linux/FHS     | `${HOME}/hosts/${HOSTNAME}`           |
-| AdaOS Native  | `/local`                              |
-
-where `%USER%` is the value of the environment variable `USER`, and `${HOME}` is the value of
-the environment variable `HOME`, and `${HOSTNAME}` is the value of the environment variable
-`HOSTNAME`. 
-
-These values may vary.
-
-The files stored in this directory are expected to be separate from the files stored on other
-computer systems (even for the same package installation name has been installed by the same
-user on different computer systems). 
-
-Every [compartment model](../adaos/compart.md) has the property `Local_State_Directory` for
-this directory. 
+installation to store files [specific to the installation and a computer
+system](../kantan/kantan.md#local). 
 
 
-
------------------------------------------------------------------------------------------------
-## Directory for Package Installation Data {#data}
+### Directory for Package Installation Data
 
 The variable `PROGRAMDATA` contains the full, absolute path of the directory for files to be
-stored which are specific to a package, but not specific to any installation of the package. 
-
-A package named `P` should store these files in the following directory:
-
-    ${PROGRAMDATA}/P
-
-The value of the environment variable `PROGRAMDATA` is typically as follows:
-
-| Platform      | Directory                             |
-| ------------- | ------------------------------------- |
-| Windows       | `C:\ProgramData`                      |
-| Linux/FHS     | `/etc`                                |
-| AdaOS Native  | `/data`                               |
-
-These values may vary.
-
-A package whose name is `P` should store its non-installation specific configuration data
-files in the following directory:
-
-    ${PROGRAMDATA}/P/config
-
-The files in this location would be private to the package `P`. 
-
-Every package has a property `State_Directory` for this directory. 
-
-
-
-
-
-
-
------------------------------------------------------------------------------------------------
-## 
-
-
-
-
-
------------------------------------------------------------------------------------------------
-## 
-
-
-
-
-
------------------------------------------------------------------------------------------------
-## 
-
-
-
-
-
------------------------------------------------------------------------------------------------
-## 
-
-
-
-
-
------------------------------------------------------------------------------------------------
-## 
-
-
+stored which are [specific to a package, but not specific to any installation of the
+package](../kantan/kantan.md#data). 
 
 
 
@@ -756,40 +1053,6 @@ the whole world (of external entities) to the program.
 
 
 -----------------------------------------------------------------------------------------------
-## Temporary Directory {#temp}
-
-On a [hosted platform](../pxcr/targets.md#plat), the environment variable `TMPDIR` contains the
-full, absolute path of the [Temporary Files Directory](../rts/envvars.md#tmpdir) of the host
-operating system. 
-
-.....
-
-
-
-
-
-
-
-
------------------------------------------------------------------------------------------------
-## Home Directory {#home}
-
-Every [principal](../security/security.md#princ) has a directory associated with it (or him or 
-her) called the principal's _home directory_, which contains all (or nearly all) the data 
-associated with that principal. 
-
-
-
-........
-
-
-
-
-
-
-
-
------------------------------------------------------------------------------------------------
 ## 
 
 
@@ -830,6 +1093,8 @@ supported.
 
 The _system installer_ is the first thing that needs to be run/installed in order to start 
 installing an ECLAT development system onto a computer. 
+
+[Kantan](../kantan/kantan.md)
 
 ......
 

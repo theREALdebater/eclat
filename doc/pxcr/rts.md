@@ -113,7 +113,7 @@ This module class defines the following subroutines and macros:
 | Name                        | Purpose
 | --------------------------- | ---------------------------------------------------------------
 | `execute`                   | Execution of the RTS (and therefore everything else)
-| `register_assembly`         | Register an [assembly](programs.md#registry)
+| `register_partition`         | Register an [partition](programs.md#registry)
 | ``                          | 
 | ``                          | 
 | ``                          | 
@@ -211,10 +211,10 @@ $EXPORT $DATA system.rts.compartments:
                ),
                allocated: @{1, table.length} * {0, 1}
             ),
-            assemblies: (
+            partitions: (
                table: (
                   length: {0, $.uns.max},
-                  values: @{1, system.config.limits.assemblies} * (
+                  values: @{1, system.config.limits.partitions} * (
                      object: {1, system.config.limits.objects},
                      ?????
                   ),
@@ -258,8 +258,8 @@ This module class exports the following data:
 | Name                        | Purpose
 | --------------------------- | ------------------------------------------------------------------
 | `limits`                    | lengths of the [system tables](#systab)
-| `fixed_assemblies`          | the [fixed assemblies](../rts/assemblies.md#fixed)
-| `initial_assembly`          | the [initial assembly](../rts/assemblies.md#initasm)
+| `fixed_partitions`          | the [fixed partitions](../rts/partitions.md#fixed)
+| `initial_partition`          | the [initial partition](../rts/partitions.md#initasm)
 | ``                          | 
 | ``                          | 
 | ``                          | 
@@ -278,8 +278,8 @@ This module class exports the following data:
 
 
 
-??????If `Na` is the number of fixed assemblies, and `Ni` is the number of arguments of the initial 
-assembly, the PXC for these exports is:
+??????If `Na` is the number of fixed partitions, and `Ni` is the number of arguments of the initial 
+partition, the PXC for these exports is:
 
 Ada
 
@@ -289,17 +289,17 @@ system.config: (
       objects: {0, $.uns.max},
       compartments: {0, $.uns.max},
       instances: {0, $.uns.max},
-      assemblies: {0, $.uns.max},
+      partitions: {0, $.uns.max},
       ?????: {0, $.uns.max},
    ),
-   fixed_assemblies: (
+   fixed_partitions: (
       table: {1, Na} * (
          ?????
       ),
       ?????
    ),
-   initial_assembly: (
-      id: {1, limits.assemblies},
+   initial_partition: (
+      id: {1, limits.partitions},
       arguments: {1, Ni} * @(
          length: {0, $.uns.max}, 
          chars: @{0, length} * {0, $.uns16.max}
@@ -506,7 +506,7 @@ When the RTS runs, it .....
 
  1. RTS Initialisation
  
- 2. Initial Assembly Execution
+ 2. Initial Partition Execution
  
  3. RTS Shutdown
  
@@ -523,14 +523,14 @@ For every procedure called, if an exception is propagated out, .....
 
  1. ......
  
- 2. ?????AdaOS: The fixed assemblies are [registered](assemblies.md#registry); 
+ 2. ?????AdaOS: The fixed partitions are [registered](partitions.md#registry); 
  
  3. ......
 
 
 
 -----------------------------------------------------------------------------------------------
-## Initial Assembly Execution
+## Initial Partition Execution
 
 
 
@@ -545,16 +545,16 @@ For every procedure called, if an exception is propagated out, .....
 
 
 
-A new executional instance, the [top instance](instances.md#top), is created for the [initial assembly](assemblies.md#initasm)
+A new executional instance, the [top instance](instances.md#top), is created for the [initial partition](partitions.md#initasm)
 , and the 
-initial assembly is executed. 
+initial partition is executed. 
 
 The top instance will always have [SIT](#sit) number 1, and will remain ..... for the execution of the entire .....
 
-If the initial assembly name were in a variable `N`, the initial assembly is retrieved from the 
+If the initial partition name were in a variable `N`, the initial partition is retrieved from the 
 registry, into a variable `A` say, by calling:
 
-    A: AdaOS.Execution.Program_Assembly'Class := AdaOS.Assemblies.Registry (N);
+    A: AdaOS.Execution.Program_Partition'Class := AdaOS.Partitions.Registry (N);
     
 Then the top instance, in a variable named `T` say, is obtained by calling: 
 
@@ -620,9 +620,9 @@ On a bare metal platform, the RTS shuts down the computer it is running on. ....
 A hosted RTS can receive various _signals_ from its host platform, telling it that something 
 has happened or that there is a change in its circumstances. 
 
-AdaOS Native also generates these signals, as a way of controlling assemblies .....
+AdaOS Native also generates these signals, as a way of controlling partitions .....
 
-The [environment task](#envtask) of the target assembly traps these signals .....
+The [environment task](#envtask) of the target partition traps these signals .....
 
 .....
 

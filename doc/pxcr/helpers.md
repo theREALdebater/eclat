@@ -29,7 +29,7 @@ It passes in a context object that the helper can use to obtain
 some information about the pending realisation, and to do certain things to change its state 
 (in particular, regarding its configuration). 
 
-Helpers can generate on-the-fly modules .....
+Helpers can generate on-the-fly [pseudo modules](realizor.md#pseudo) .....
 
 The `Execute` procedure is executed prior to performing the realisation unless it includes the 
 dependency `$REALIZE`, in which case it is executed after the realisation has been completed. 
@@ -48,7 +48,7 @@ dependency `$REALIZE`, in which case it is executed after the realisation has be
 ### Program Helper
 
 
-Program Helper generates the configuration data for the assemblies and the program.
+Program Helper generates the configuration data for the partitions and the program.
 
 [Building a Program (Partitions)](../eclat/building.md#progprod)
 
@@ -62,10 +62,9 @@ add to an image.
 
 
 
+### System Configuration Helper
 
-### Run-Time Support Configuration Helper
-
-The [Run-Time Support Configuration Helper](../pxcr/realizor.md#rtsch) 
+The [System Configuration Helper](?????) 
 
 
 

@@ -45,11 +45,11 @@ with
 is
    type Language_Code is new array String (1 .. 3)
       with Dynamic_Predicate =>
-         (for all E of Language_Code => E in of Character range 'a' .. 'z');
+         (for all E of Language_Code => E in Character range 'a' .. 'z');
 
    type Country_Code is new array String (1 .. 2)
       with Dynamic_Predicate =>
-         (for all E of Country_Code  => E in of Character range 'A' .. 'Z');
+         (for all E of Country_Code  => E in Character range 'A' .. 'Z');
 
    Language_Unknown : constant Language_Code := "und";
    Country_Unknown : constant Country_Code := "ZZ";
@@ -293,7 +293,7 @@ The Ada functions `Includes` and `Canonical` are declared-pure, so they .....
 
 .....
 
-ECLAT is supplied with a tool named [Phrasier](#phrasier) to assist with string translation in 
+ECLAT is supplied with a tool named [Phrasier](#phrasier) to assist with string translation in
 Ada and C programs. 
 
 .....
@@ -307,6 +307,41 @@ Ada and C programs.
 .....
 
 
+```ada
+package.Locales.Numerics
+is
+
+
+   function Number_Fill (Locale: in Locale_Identifier) return Character;
+   function Number_Fill (Locale: in Locale_Identifier) return Wide_Character;
+   function Number_Fill (Locale: in Locale_Identifier) return Wide_Wide_Character;
+
+--| The function `Number_Fill` returns the .....
+--| For example, for the locale ("eng", "US"), the number fill character is '*'. 
+
+   function Number_Separator (Locale: in Locale_Identifier) return Character;
+   function Number_Separator (Locale: in Locale_Identifier) return Wide_Character;
+   function Number_Separator (Locale: in Locale_Identifier) return Wide_Wide_Character;
+
+--| The function `Number_Separator` returns the .....
+--| For example, for the locale ("eng", "US"), the number separator character is ','. 
+
+   function Number_Radix_Mark (Locale: in Locale_Identifier) return Character;
+   function Number_Radix_Mark (Locale: in Locale_Identifier) return Wide_Character;
+   function Number_Radix_Mark (Locale: in Locale_Identifier) return Wide_Wide_Character;
+
+--| The function `Number_Radix_Mark` returns the .....
+--| For example, for the locale ("eng", "US"), the number radix mark is '.'. 
+
+
+
+end;
+```
+
+
+
+
+
 
 ### Units of Measure
 
@@ -318,6 +353,95 @@ Ada and C programs.
 
 .....
 
+```ada
+package Ada.Locales.Money
+is
+   function Currency_Name (Locale: in Locale_Identifier) return String;
+   function Currency_Name (Locale: in Locale_Identifier) return Wide_String;
+   function Currency_Name (Locale: in Locale_Identifier) return Wide_Wide_String;
+
+--| The function `Currency_Name` returns the .....
+--| For example, for the locale ("eng", "US"), the currency name is "United States Dollar". 
+
+   function Currency_Unit (Locale: in Locale_Identifier) return String;
+   function Currency_Unit (Locale: in Locale_Identifier) return Wide_String;
+   function Currency_Unit (Locale: in Locale_Identifier) return Wide_Wide_String;
+
+--| The function `Currency_Unit` returns the .....
+--| For example, for the locale ("eng", "US"), the currency unit is "USD". 
+
+   function Currency (Locale: in Locale_Identifier) return String;
+   function Currency (Locale: in Locale_Identifier) return Wide_String;
+   function Currency (Locale: in Locale_Identifier) return Wide_Wide_String;
+
+--| The function `Currency` returns the .....
+--| For example, for the locale ("eng", "US"), the currency is "$". 
+
+   function Currency_Subdenomination (Locale: in Locale_Identifier) return String;
+   function Currency_Subdenomination (Locale: in Locale_Identifier) return Wide_String;
+   function Currency_Subdenomination (Locale: in Locale_Identifier) return Wide_Wide_String;
+
+--| The function `Currency_Subdenomination` returns the name of the subdenomination of the 
+--| currency. 
+--| 
+--| For example, for the locale ("eng", "US"), the subdenomination is "Cent". 
+
+
+
+
+   function Currency_Subdenomination_Digits (Locale: in Locale_Identifier) return Natural;
+
+--| The function `Currency_Subdenomination_Digits` returns the .....
+--| 
+--| 
+--| For example, for the locale ("eng", "US"), the number of subdenomination digits is 2. 
+
+
+   function Currency_Picture (Locale: in Locale_Identifier; 
+                              Fore:   in Natural; 
+                              Aft:    in Natural) return Ada.Text_IO.Editing.Picture;
+
+   function Currency_Picture (Locale: in Locale_Identifier; 
+                              Fore:   in Natural) return Ada.Text_IO.Editing.Picture;
+
+   function Currency_Picture (Locale: in Locale_Identifier) return Ada.Text_IO.Editing.Picture;
+
+--| The function `Currency_Picture` returns the .....
+--| 
+--| For example, for the locale ("eng", "US"), the picture's string, with default `Fore` of 
+--| 10 and `Aft` of 2, is "$$,$$$,$$$,$9.99". 
+--| 
+--| There are three overloadings. The one with a `Fore` parameter but no `Aft` assumes the 
+--| value of calling `Currency_Subdenomination_Digits(Locale)` for `Aft`. The one with no 
+--| arguments also assumes an implementation-defined value for `Fore` between 8 and 15. 
+
+   function Currency_Fill (Locale: in Locale_Identifier) return Character;
+   function Currency_Fill (Locale: in Locale_Identifier) return Wide_Character;
+   function Currency_Fill (Locale: in Locale_Identifier) return Wide_Wide_Character;
+
+--| The function `Currency_Fill` returns the .....
+--| For example, for the locale ("eng", "US"), the currency fill character is '*'. 
+
+   function Currency_Separator (Locale: in Locale_Identifier) return Character;
+   function Currency_Separator (Locale: in Locale_Identifier) return Wide_Character;
+   function Currency_Separator (Locale: in Locale_Identifier) return Wide_Wide_Character;
+
+--| The function `Currency_Separator` returns the .....
+--| For example, for the locale ("eng", "US"), the currency separator character is ','. 
+
+   function Currency_Radix_Mark (Locale: in Locale_Identifier) return Character;
+   function Currency_Radix_Mark (Locale: in Locale_Identifier) return Wide_Character;
+   function Currency_Radix_Mark (Locale: in Locale_Identifier) return Wide_Wide_Character;
+
+--| The function `Currency_Radix_Mark` returns the .....
+--| For example, for the locale ("eng", "US"), the currency radix mark is '.'. 
+
+   
+
+
+
+end;
+```
 
 
 
@@ -326,6 +450,17 @@ Ada and C programs.
 
 .....
 
+```ada
+package Ada.Text_IO.Time_IO
+is
+   
+
+
+
+
+
+end;
+```
 
 
 
@@ -477,7 +612,7 @@ LC_COLLATE affects the behavior of functions such as strcoll and strxfrm. LC_MON
 The variable `` .....
 
 LC_CTYPE
-Defines character classification, case conversion, and other character attributes.
+Defines character classification, case conversion, and other character properties.
 
 LC_CTYPE
 Specifies the locale to use for LC_CTYPE category information. The LC_CTYPE category determines character handling rules governing the interpretation of sequences of bytes of text data characters (that is, single-byte versus multibyte characters), the classification of characters (for example, alpha, digit, and so on), and the behavior of character classes.

@@ -1,9 +1,8 @@
 -----------------------------------------------------------------------------------------------
 # Building
 
-One of the fundamental functions of ECLAT is _building_ something
-
-from a [library](libraries.md)
+One of the fundamental functions of ECLAT is _building_ one or more PXC
+[modules](../pxcr/modules.md) from  a [library](libraries.md). 
 
 .....
 
@@ -11,8 +10,19 @@ from a [library](libraries.md)
 
 
 -----------------------------------------------------------------------------------------------
+## Contributory Libraries {#contlib}
+
+A library that produces no products (has no products configured) is termed a _contributory
+library_. Such libraries are only used by being included in other libraries. 
+
+.....
+
+
+
+-----------------------------------------------------------------------------------------------
 ## Products {#prod}
 
+A [library](libraries.md) 
 ..... _product_, that gives the information needed to enable ECLAT to build .....
 
 There are three types of product:
@@ -23,16 +33,11 @@ There are three types of product:
 
  * [program products](progprod)
 
-Each different product is identified by a _product name_, which is a [ECLAT Entity
-Name](../intro/names.md) .....
+Each different product is identified by a _product name_, which is a [Scoped Name](../intro/names.md#scop),
+scoped to the library  .....
 
 
 
-
-
-
------------------------------------------------------------------------------------------------
-## .....
 
 
 
@@ -64,38 +69,48 @@ Name](../intro/names.md) .....
 -----------------------------------------------------------------------------------------------
 ## Module Products {#modprod}
 
-The purpose of a _module product_ is to generate one or more [modules](../pxcr/modules.md)
-which have [exports](../pxcr/modules.md#elem). The exports are declared in the source text.
+The purpose of a _module product_ is to generate any kind of PXC [module](../pxcr/modules.md)
+other than those of a [plugin](#plugprod) or [program](#progprod). 
 
-A module product has no assemblies, and no main procedure.
+A module product has no partitions, and no main procedure. Its
+[exports](../pxcr/modules.md#elem) of the module are explicitly declared in the source text.
 
-Each module being generated includes all the PXC code corresponding to all the subroutines
-explicitly exported by that module, together with all the code corresponding to the downward
-closure of the subprograms called by those subroutines, plus all the data explicitly exported.
+The module being generated includes:
+
+ * all the PXC code corresponding to all the subroutines explicitly exported by that module,
+   together with 
+   
+ * all the code corresponding to the downward closure of the subprograms called by those
+   subroutines, plus 
+   
+ * all the data explicitly exported.
 
 ......
 
+A library which is configured to build one or more module products is called a _module
+library_. 
 
-
+Typically, a module library's main or only purpose will be to build one module product. It is
+possible (but unusual) for a library to serve more than one purpose, or to be configured to
+build more than one product. Such libraries are termed _hybrid libraries_. 
 
 
 ### Module Class Checking
 
-Each generated module is checked against the [module class definition](../pxcr/mcd.md) file,
-for every module class that the module is in. Every export in the module must match a
-corresponding export definition in the MCD, and there must be no remaining unmatched exports
-in the MCD.
+The built module is checked against a [module class definition](../pxcr/mcd.md) file, for every
+module class that the module is (configured to be) in. Every export in the module must match a
+corresponding export definition in the MCD, and there must be no remaining unmatched exports in
+the MCD.
 
 .....
 
-
-
+If the MCD does not exist, ECLAT generates a skeletal MCD, .....
 
 
 ### Initialisation
 
-For any module being generated, there will be a set of library-level non-generic packages with
-initialisation code.
+For the module being built, there will be a set of library-level non-generic packages (but
+including instantiations of generic packages) with initialisation code. 
 
 ?????in which at least
 one subprogram is included in the set of all the subroutines explicitly exported by that
@@ -110,40 +125,56 @@ under the name:
 
 where `M` is the name of the module.
 
-Nothing automatically calls any of these initialisation subroutines; something somewhere will
-need to call them at the appropriate time.
+Nothing automatically calls this initialisation subroutine; something somewhere will need to
+call it at the appropriate time.
 
 ......
 
 
-### Stub Libraries {#stublibs}
+### Stub and Base Libraries {#stublibs}
 
-?????The `eclat` [command-line tool](../tools/eclat.md) has a command `create-stub-library` (or
-`mkstub`) which generates the Ada and C++ source text for a _stub library_ of a module of a
-module product.
+Typically, for each module product the module library is configured to build, a module library
+will be accompanied by a _base library_ and a _stub library_. Both are contributory libraries. 
 
-A stub library contains declarations which import suitable entities for all of the exports of
-the module.
+The stub library contains declarations which import suitable entities for all of the exports of
+the module, and can be included by other libraries as a convenient way to import and use the
+module's exports. 
 
-This source text can be used as a way for other Ada and C++ libraries to import and use the
-module's exports.
+The base library contains declarations for all the entities, such as types for example, that
+are used by both the module library and the stub library. It will be included by both the
+module library and the stub library. 
 
-?????The generated Ada stub library contains just one package, a non-generic, library-level
-package, which contains all the declarations of constants, variables, types, and subprograms
-necessary to meaningfully import all of the module's exports.
+There is a convention in the naming of the module library and its corresponding base and stub
+libraries. If the module's library is named: 
 
-?????The generated C++ stub library contains one file. In this, there is a namespace which contains
-all the declarations of constants, variables, typedefs, and functions necessary to meaningfully
-import all of the module's exports.
+    M.Module
 
-?????The names of the library, namespace, and package can be configured, but by default they are
-derived from the module's name (each `-` hyphen is converted into an `_` underscore).
+Then the base library is named: 
 
-?????It will be usual for a stub library, having been generated, to have hand-made modifications
-which add comments and generally change the library into something good for someone wanting to
-use the module.
+    M.Base
+
+and the stub library  is named: 
+
+    M.Stub
 
 .......
+
+
+### ??????
+
+It is very typical to begin developing a library as a contributory library and then, when it
+has reached a high enough degree of stability (it is not changed very often), to change it into
+a trio of a module library, base library, and stub library. 
+
+.....
+
+
+
+
+
+
+
+
 
 
 ### Configuration
@@ -156,13 +187,13 @@ For example:
 
 ```xml
 <?xml version="1.0"?>
-<eclat-state-update>
+<eclat-state-update xmlns="?????">
    <product>
       <name> gat </name>
       <module>
-         <name> acme.fgs.gat </name>
+         <name> ACME.FGS.GAT </name>
          <version> 1.7.0 </version>
-         <class> acme.fgs.gat </class>
+         <class> ACME.FGS.GAT </class>
       </module>
    </product>
 </eclat-state-update>
@@ -180,9 +211,9 @@ eclat-stup
 
 
 
-In this example, the module has the name `acme.fgs.gat` (which, in the fictional universe of
-our examples, stands for a company named Acme, Faculty of Geological Sciences, Geological
-Analysis Tools).
+In this example, the module has the name `ACME.FGS.GAT` (which, in the fictional universe of
+our examples, stands for a company named ACME, Faculty of Geological Sciences, Geological
+Analysis Tools). 
 
 .....
 
@@ -190,17 +221,13 @@ The version number for the module, when it is built, is explicitly given as 1.7.
 normal for the version number to be specified like this. Instead, it is normally omitted, and
 then the version number of the module will be automatically taken from that of the library. 
 
-?????If
-the version has been explicitly set, the command `modver -a` (or `module-version --auto`)
-will set it back to automatic.
-
 The module is set to belong to one [module class](../pxcr/modules.md#classes), also named
-`acme.fgs.gat`. 
+`ACME.FGS.GAT`. 
 
-?????If the module belongs to just one module class, whose ID is the same as the
-module ID, then the class doesn't need to be explicitly set.
+If the module belongs to just one module class, whose name is the same as the module ID, then
+the class doesn't need to be explicitly set.
 
-It can be imagined there is a corresponding [module class definition](../pxcr/mcd.md#example).
+It can be imagined there is a corresponding [module class definition](../pxcr/mcd.md#example). 
 
 ?????Finally, the module is set to contain all the exports (in the CWL) whose names begin with
 `acme.fgs.geo.` Note the use of the `*` wildcard. An asterisk must always be next to a `.`
@@ -436,7 +463,7 @@ The purpose of a _plugin product_ is to generate a module which is a
 [plugin](../pxcr/plugins.md). The module is implicit (it is never explicitly configured) and
 always has the same name as the product.
 
-A plugin product has no assemblies, and no main procedure.
+A plugin product has no partitions, and no main procedure.
 
 It is configured with a set of [plugin classes](../pxcr/plugins.md#classes).
 
@@ -490,7 +517,7 @@ as if it were declared like this example:
 
    Plugin_Classes: constant array (Positive range <>)
       of not null access constant Wide_String :=
-         (new Wide_String'("ACME.GREENHOUSE.DEVICE_CONTROLLER",
+         (new Wide_String'("ACME.GREENHOUSE.DEVICE_CONTROLLER"),
           new Wide_String'("ACME.GREENHOUSE.TEMPERATURE_PROBE"))
    with
       Export,
@@ -607,15 +634,18 @@ mkmod acme.greenhouse.service
 -----------------------------------------------------------------------------------------------
 ## Partitions {#part}
 
-An Ada program is divided into partitions (see [Ada Reference Manual, 10.2 Program
-Execution][1]). Note that, in practice, most programs will comprise just one assembly.
+An Ada program is divided into _partitions_ (see [Ada Reference Manual, 10.2 Program
+Execution][1]). Note that, in practice, many programs will comprise just one partition.
 
 Partitions can be executed separately---possibly on different computers in a network---but
 nevertheless form part of a single coherent [program](../adaos/programs.md).
 
+..... AdaOS has a corresponding notion of [partitions](../adaos/partitions.md) .....
+
+If it is necessary to distinguish, the term _AdaOS partition_ is used for the AdaOS notion of a
+partition, whereas the term _build partition_ is used for the Ada (and ECLAT) notion. 
+
 .....
-
-
 
 
 
@@ -631,7 +661,7 @@ procedure. (The standard allows any subprogram, but ECLAT requires a parameterle
 
 In a program, one partition (in a build) must have a main subprogram, and only one partition
 may have a main subprogram. If more or less than one partition has a main subprogram,
-explicitly configured or by default, building the product [fails](#fail).
+explicitly configured or by default, building the product [fails](#fail). ????? really?
 
 The partition with a main subprogram is termed the _main partition_, and its module is termed
 the _main partition module_.
@@ -727,18 +757,18 @@ partition.
 
  * for every partition module, ECLAT adds a [partition module table](#pmt) export;
 
- * ?????for the main assembly module, adds a [assembly identifier table](#pit) export.
+ * ?????for the main partition module, adds a [partition identifier table](#pit) export.
 
- * for the main assembly module, ECLAT adds a main subprogram export;
+ * for the main partition module, ECLAT adds a main subprogram export;
 
- * for the main assembly module, ECLAT adds code to the end of the module initialisation procedure
+ * for the main partition module, ECLAT adds code to the end of the module initialisation procedure
    which registers the corresponding [program](../rts/programs.md).
 
 
 .....
 
-It should be noted that, in this mode, there only needs to be one assembly---which will
-necessarily be the main assembly---and this is how a non-assemblyed program is built.
+It should be noted that, in this mode, there only needs to be one partition---which will
+necessarily be the main partition---and this is how a non-partitioned program is built.
 
 For the overall program,
 
@@ -750,7 +780,7 @@ For the overall program,
 ## Program Helper {#proghelp}
 
 The Program Helper [Realizor Helper plugin](../pxcr/helpers.md)
-[generates](../pxcr/modules.md#genmod) the configuration data for the assemblies and the
+[generates](../pxcr/modules.md#genmod) the configuration data for the partitions and the
 program in the [run-time support](../rts/rts.md) configuration module.
 
 
@@ -758,11 +788,11 @@ program in the [run-time support](../rts/rts.md) configuration module.
 
 
 
-### Assemblies
+### Partitions
 
-One or more [fixed assemblies](../rts/assemblies.md#fixed) can be configured for a program.
+One or more [fixed partitions](../rts/partitions.md#fixed) can be configured for a program.
 
-Each fixed assembly must be configured with the partitions that will go to make it up.
+Each fixed partition must be configured with the partitions that will go to make it up.
 
 ..... pointing at the module initialisation procedure ......
 
@@ -799,7 +829,7 @@ For example:
          <partition>
             <name> printer-controller </name>
             <module-name> acme.fgs.earthquake-monitor.printer-controller </module-name>
-            <assembly-name> acme.fgs.earthquake-monitor.printer-controller </assembly-name>
+            <partition-name> acme.fgs.earthquake-monitor.printer-controller </partition-name>
             <unit> HP4114P </unit>
             <unit> HP4114P.Monitoring </unit>
             <unit> Print_Formatting </unit>
@@ -807,25 +837,25 @@ For example:
          <partition>
             <name> main </name>
             <module-name> acme.fgs.earthquake-monitor.main </module-name>
-            <assembly-name> acme.fgs.earthquake-monitor.main </assembly-name>
+            <partition-name> acme.fgs.earthquake-monitor.main </partition-name>
             <main-unit> Main </main-unit>
          </partition>
          <partition>
             <name> datatape-controller </name>
             <module-name> acme.fgs.earthquake-monitor.datatape-controller </module-name>
-            <assembly-name> acme.fgs.earthquake-monitor.datatape-controller </assembly-name>
+            <partition-name> acme.fgs.earthquake-monitor.datatape-controller </partition-name>
             <unit> HP7012 </unit>
             <unit> HP7012.Control </unit>
          </partition>
-         <assembly>
+         <partition>
             <name> acme.fgs.earthquake-monitor.main </name>
-         </assembly>
-         <assembly>
+         </partition>
+         <partition>
             <name> acme.fgs.earthquake-monitor.datatape-controller </name>
-         </assembly>
-         <assembly>
+         </partition>
+         <partition>
             <name> acme.fgs.earthquake-monitor.printer-controller </name>
-         </assembly>
+         </partition>
       </program>
    </product>
 </eclat-state-update>
@@ -840,9 +870,9 @@ For example:
 
 
 This example creates a program divided into three partitions. Note that the module names and
-assembly names have been explicitly specified, with the values that they would have been given
+partition names have been explicitly specified, with the values that they would have been given
 by default. Also, the whole main partition has been set to values it would have taken by
-default, and the assemblies have been explicitly configured but with no properties other than
+default, and the partitions have been explicitly configured but with no properties other than
 the defaults. 
 
 Therefore, the exact same configuration would be more succinctly provided by:
@@ -880,10 +910,10 @@ it finds one. Anything with a `name` can have any number of `previous-name` elem
 
 At the same time, if the update program finds a product named `quakemon`, it will delete it
 first. In other words, the properties defined in the `product` element (with name `quakemon`)
-will replace any existing product named `quakemon`. To avoid this effect, add the attribute
+will replace any existing product named `quakemon`. To avoid this effect, add the property
 `update="add"` to the `product` element. 
 
-I the attribute `update="add"` is added, then `previous-name` changes behaviour: instead of
+I the property `update="add"` is added, then `previous-name` changes behaviour: instead of
 just deleting a product with the `qm` previous name, that product's properties will be added to
 `quakemon`, and *then* the `qm` product will be deleted. Thus, the old product (`qm`) will
 update the new one (`quakemon`). 
@@ -969,7 +999,7 @@ For example, we may have a build:
 It is typical to end the name of a build with `.prod` for a production build, or `.test` for a
 (end-user) testing build, or `.debug` for a (developer) testing and debugging build.
 
-Suppose this build has four assemblies, named:
+Suppose this build has four partitions, named:
 
     acme.greenhouse.aircon
     acme.greenhouse.salinity
@@ -984,13 +1014,13 @@ To configure this build, we might use the following command:
 ```
 eclat read <<.
 build acme.greenhouse.prod add
-assembly acme.greenhouse.aircon add
+partition acme.greenhouse.aircon add
 unit Acme.Greenhouse.Aircon add
-assembly acme.greenhouse.salinity add
+partition acme.greenhouse.salinity add
 unit Acme.Greenhouse.Salinity add
-assembly acme.greenhouse.security add
+partition acme.greenhouse.security add
 unit Acme.Greenhouse.Security add
-assembly acme.greenhouse.main add
+partition acme.greenhouse.main add
 unit Acme.Greenhouse.Main add
 main Main
 .
@@ -1076,9 +1106,9 @@ is
 -----------------------------------------------------------------------------------------------
 ## Partition Initialisation
 
-When an [assembly](../rts/assemblies.md) is executed, it is expected that the [run time
+When an [partition](../rts/partitions.md) is executed, it is expected that the [run time
 system](../rts/rts.md) will call the [module initialisation procedure](../pxcr/modules.md#init)
-of each assembly module.
+of each partition module.
 
 ......
 
@@ -1095,25 +1125,25 @@ ECLAT which is equivalent to the following Ada source text:
 
 ```ada
 declare
-   A: AdaOS.Execution.Assembly_Access;
+   A: AdaOS.Execution.Partition_Access;
 begin
    -- other initialisation
-   AdaOS.Execution.Registration.Register_Assembly (N, P, A);
+   AdaOS.Execution.Registration.Register_Partition (N, P, A);
    -- other initialisation
 end;
 ```
 
 In the above,
 
- * `P` is replaced by the memory address of the initialisation procedure of the assembly;
+ * `P` is replaced by the memory address of the initialisation procedure of the partition;
 
- * `N` is replaced by a static string value which is the configured name of the assembly;
+ * `N` is replaced by a static string value which is the configured name of the partition;
 
- * `A` represents an assembly object, of a type derived from
-   `AdaOS.Execution.Program_Assembly`.
+ * `A` represents a partition object, of a type derived from
+   `AdaOS.Execution.Program_Partition`.
 
-The procedure `AdaOS.Execution.Registration.Register_Assembly` is imported with the external
-name `system.register_assembly`. The RTS exports this procedure.
+The procedure `AdaOS.Execution.Registration.Register_Partition` is imported with the external
+name `system.register_partition`. The RTS exports this procedure.
 
 
 

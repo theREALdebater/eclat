@@ -84,7 +84,7 @@ end Prunae;
 We pass the weight of the plum into the guardian, and leave it to the guardian to work out 
 whether the caller has a strong enough stomach to eat the plum. 
 
-It is expected that the date and time of the call is also passed in as an attribute 
+It is expected that the date and time of the call is also passed in as a property 
 `Time_of_Call`. That would, for example, enable us at a later point to add a rule that plums 
 may not be eaten after midnight, or that they may not be eaten in September. Only the 
 (specification data governing the) guardian would need to be changed; the Ada source text could 

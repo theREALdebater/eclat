@@ -22,17 +22,20 @@ is
 --| input (inlcuding possibly having different program arguments), which will cause each 
 --| different instance's behaviour to vary accordingly.
 
-   function Task_Instance (Id: in Task_Id := Current_Task) return Instance_Access;
+   package Task_Instance
+   is
+      function Value (Id: in Task_Id := Current_Task) return Instance_Access;
+   end;
 
---| The function `Task_Instance` returns (a remote access value referencing) the executional 
---| instance of the calling task or an explicitly identified task. 
+--| The function `Task_Instance` returns (a remote access value referencing) the 
+--| executional instance of the calling task or an explicitly identified task. 
 
    function Startpoint (Instance: not null access Executable_Instance := Task_Instance) 
    return 
-      Assembly_Access is abstract;
+      Partition_Access is abstract;
 
---| The function `Startpoint` returns (a remote access value referencing) the program startpoint 
---| that the calling task's instance or a given instance is an execution of. 
+--| The function `Startpoint` returns (a remote access value referencing) the program 
+--| startpoint that the calling task's instance or a given instance is an execution of. 
 
 --| Every executional instance is associated with a _compartment_. 
 
@@ -40,8 +43,8 @@ is
    return 
       Compartment_Access is abstract;
 
---| The function `Compartment` returns (a remote access value referencing) the program compartment 
---| of the calling task's instance or a given instance. 
+--| The function `Compartment` returns (a remote access value referencing) the program 
+--| compartment of the calling task's instance or a given instance. 
 
 --\
 -----------------------------------------------------------------------------------------------
@@ -102,7 +105,7 @@ is
 --| 
 --| This parent-child relationship between instances creates a hierarchy (tree). 
 
-   function Spawn (Startpoint: in out Program_Assembly;
+   function Spawn (Startpoint: in out Program_Partition;
                    Parent:   in     Instance_Access := null) 
       return 
          Instance_Access is abstract;

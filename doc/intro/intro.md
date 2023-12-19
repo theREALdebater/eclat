@@ -99,7 +99,7 @@ There are several saved states, which contain configuration and working data:
  * for the Realizor service, which contains the information needed to realise modules into 
    executable images; 
 
- * for the run time system, which contains information about assemblies; 
+ * for the run time system, which contains information about partitions; 
 
  * for the Tethys service, which contains information about programs and service programs. 
 
@@ -244,8 +244,8 @@ on the addition of types within the class of a type already defined in the progr
 I intend to eventually implement the full Distributed Systems Annex (DSA), with at least one 
 implementation of the PCS. See the Ada Reference Manual, Annex E, for details. 
 
-The DSA defines how an Ada program can have multiple �assemblies�. Any one instance of the 
-program can run different assemblies on different computers. 
+The DSA defines how an Ada program can have multiple �partitions�. Any one instance of the 
+program can run different partitions on different computers. 
 
 In addition to this, I intend to introduce a framework for intra-program services, and 
 an implementation of it. This would allow multiple instances of a program (each running in its 
@@ -362,7 +362,7 @@ There will be actual guardians supporting:
  * mandatory security (labels)
  * discretionary security (ACLs)
  * role-based security
- * attribute-based security
+ * property-based security
  * possibly other security models
 
 To start with, we�ll have a dummy guardian that just says �Yes� to all requests. The important 
@@ -390,8 +390,11 @@ a primitive operation, and the term _property_ is adopted to mean a value associ
 type that one can 'get' from an object of the type and that one can 'set' for an object of the
 type. 
 
-The convention that is widely used in Ada is that the _getter_ of a property `P` is a function
-named `P`, and the _setter_ of the property is a procedure named `Set_P`. 
+The convention that is widely used in Ada is that the _getter_ of a property `A` is a function
+named `A`, and the _setter_ of the property is a procedure named `Set_A`. 
+
+If a property is _read-only_, then there will only be the getter function, and no setter.
+Some other mechanism will set the value. 
 
 For example, for a property named `Height`: 
 
@@ -419,12 +422,17 @@ identify each sides by a positive integer, we might have a 'length' property lik
 
 ```ada
 
-function Length (Figure: in Geometric_Figure; Side: in Positive) return Length_in_Metres;
+type Side_Identifier is new Positive;
+
+function Length (Figure: in Geometric_Figure; 
+                 Side:   in Side_Identifier) return Length_in_Metres;
 
 procedure Set_Length (Figure: in out Geometric_Figure; 
-                      Side:   in     Positive; 
+                      Side:   in     Side_Identifier; 
                       Value:  in     Length_in_Metres);
 ```
+
+
 
 .....
 

@@ -17,18 +17,6 @@ The Realizor supports advanced garbage collection, with:
  * a classical reachability algorithm to establish allocated objects that are eligible for 
    reclamation;
   
- * separate sub-heaps for fixed-size small objects, which do not suffer from fragmentation and 
-   allow one-hop pointers;
-  
- * generational sub-heaps, reducing the amount of object copying required for defragmentation; 
-
- * automatically ascertaining every pool whose usage is confined to one task, so that locking 
-   can be avoided for access to the pool;
-
- * performing activities in background tasks where appropriate; 
-   
- * mechanisms to control garbage collection in various detailed ways.
-
 This does not prevent the development of Ada software that avoids the use of garbage
 collection, but it provides the option for software to make use of garbage collection. 
 
@@ -42,6 +30,18 @@ collection, but it provides the option for software to make use of garbage colle
 
 -----------------------------------------------------------------------------------------------
 ## 
+
+ * separate sub-heaps for fixed-size small objects, which do not suffer from fragmentation and 
+   allow one-hop pointers;
+  
+ * generational sub-heaps, reducing the amount of object copying required for defragmentation; 
+
+ * automatically ascertaining every pool whose usage is confined to one task, so that locking 
+   can be avoided for access to the pool;
+
+ * performing activities in background tasks where appropriate; 
+   
+ * mechanisms to control garbage collection in various detailed ways.
 
 
 

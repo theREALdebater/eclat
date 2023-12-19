@@ -1126,7 +1126,7 @@ oneof:
 end
 
 ;---------------------------------------------------------------------------------------------
-; 4.1.4 Attributes
+; 4.1.4 Properties
 
 define
    attribute_reference
@@ -2601,7 +2601,7 @@ aspect_mark ::= aspect_ identifier ['Class]
 aspect_definition ::= name | expression | identifier
 
 ;---------------------------------------------------------------------------------------------
-; 13.3 Operational and Representation Attributes
+; 13.3 Operational and Representation Properties
 
 attribute_definition_clause ::=
 for local_name ' attribute_designator use expression ;

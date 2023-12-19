@@ -1,7 +1,7 @@
 -----------------------------------------------------------------------------------------------
 # Object Scrying
 
-If a piece of Ada software, the _requestor_, wishes to [find](objects.md#find) one or more system
+If a piece of software, the _requestor_, wishes to [find](objects.md#find) one or more system
 objects which it knows the OIDs of but not their containers, it can use a mechanism called
 _object scrying_ to ascertain their containers. 
 
@@ -56,7 +56,7 @@ absolute time of type `Ada.Calendar.Time`) has expired.
 
 A responder can be anything that can receive events, but usually it will be containers
 themselves that are responders, and they will search their own members for matching OIDs (but
-not recursively, since their subcontainers will have received the event anyway). 
+not recursively, since their sub-containers will have received the event anyway). 
 
 It is more than possible that the same container will be reported multiple times; the requestor 
 will need to cope with this, for example by ignoring reported containers that have already 

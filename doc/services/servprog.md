@@ -1,58 +1,106 @@
 -----------------------------------------------------------------------------------------------
 # Controlled Services and Service Programs
 
-A _controlled service_ is a [service](../rts/services.md) that is implemented by a dedicated 
-[program](../rts/programs.md) that is called a _service program_. 
+A _service agent_ is a system object that aids in the activation of services (specifically,
+controlled services). 
+
+A _controlled service_ is a [service](services.md) that has a service agent to activate it,
+when necessary. 
+
+A _program-implemented_ controlled service is a controlled service which is implemented by a
+dedicated [program](../programs/programs.md) that is called a _service program_. 
 
 A service program is dedicated to implementing one or more controlled services when it is 
 running. Service programs do not normally do anything other than registering and implementing 
 the services. 
 
-It is unusual, in practice, for a service program to run more than one (controlled) service. 
+It is unusual, in practice, for a service program to implement more than one service, and it is
+typical for a service program to have the same name as the (one and ony) service it implements.  
 
 
 
 -----------------------------------------------------------------------------------------------
-## ?????
+## Controlled Service Metadata {#meta}
 
-A controlled service is represented by the interface type `Controlled_Service`, which is 
-derived from `AdaOS.Services.System_Service` and declared in the package 
-`AdaOS.Services.Controlled`. 
+A _controlled service metadata_ object contains the [metadata](services.md#meta) associated
+with a controlled service. 
 
-The interface type `Service_Program` represents a service program. 
+The package `AdaOS.Services.Controlled` declares the abstract tagged non-limited type
+`Controlled_Metadata`, which is derived from `Service_Metadata`. 
 
-The most important extra property of 
-
-
+This type adds one further property: 
 
 
+### Agent
 
-?????`Service_Context` 
+The `Agent` property is (an access value referencing) the [service agent](#agent) which is able
+to activate the controlled service if it is dormant, and in any event return (an access value
+referencing) the service object. 
 
 
 
+-----------------------------------------------------------------------------------------------
+## 
 
+A controlled service is represented by the limited interface type `Controlled_Service`, which
+is derived from `System_Service` and declared in the package `AdaOS.Services.Controlled`. 
 
-is the set of names of the services it implements. 
-
-This property is retrieved with the functions:
+The package `AdaOS.Services.Controlled` contains the following visible declarations: 
 
 ```ada
-function Number_Of_Services (Context: in Service_Context) return Natural is abstract;
 
-function Service_Name (Context: in Service_Context; 
-                       Number:  in Positive := 1) return Wide_String is abstract;
+function Program (Service: not null access Controlled_Service)
+return
+   access Programs.System_Program'Class is abstract;
+
+function Arguments (Service: not null access Controlled_Service)
+return
+   access constant Programs.Program_Argument_Array is abstract;
+
+function Implementor (Service: not null access Controlled_Service)
+return
+   access Programs.Program_Compartment'Class is abstract;
+
+
+
 ```
 
-The property is set with the procedures:
+
+
+.....
+
+If the service is dormant, the function `Implementor` will return `null`. 
+
+.....
+
+
+
+.....
+
+
+
+
+-----------------------------------------------------------------------------------------------
+## Service Programs {#prog}
+
+
+
+
+The interface type `Service_Program`, declared in the package `AdaOS.Services`, represents a
+service program. 
+
+The most important extra property of a service program is named `Services_Controlled`, whose
+value is a set of objects, each object being a service that the program controls (implements). 
+
+The package `AdaOS.Services` contains the following visible declarations: 
 
 ```ada
-procedure Set_Number_Of_Services (Context: in out Service_Context; 
-                                     Last:    in     Natural) is abstract;
+function Controlled_Services (Program: in Service_Program) 
+return
+   Objects.Object_Set is abstract;
 
-procedure Set_Service_Name (Context: in out Service_Context; 
-                               Name:    in     Wide_String;
-                               Number:  in     Positive := 1) is abstract;
+procedure Set_Controlled_Services (Program:  in out Service_Program; 
+                                   Services: in     Objects.Object_Set) is abstract;
 ```
 
 .....
@@ -63,32 +111,42 @@ procedure Set_Service_Name (Context: in out Service_Context;
 
 
 
+
+
+
+
 -----------------------------------------------------------------------------------------------
-## Dormancy {#dorm}
-
-A service program normally has no more than one compartment (representing one execution of the
-program). This compartment, when it exists, is called the _implementor_ of the service program
-(and therefore of its controlled services). 
-
-A service program is _dormant_ when no implementor (a compartment corresponding to an execution
-of the program) exists. When it is dormant, the service program's [mode](#mode) is either
-Dormant or Retired 
-
-Note that there may be a little bit of time in between the service program being in a
-particular mode and its implementor actually being created or destroyed. 
+##
 
 
 
 
 
 
+-----------------------------------------------------------------------------------------------
+## Service Program Metadata {#meta}
 
+Every [shepherd](#shep) maintains [service program metadata](../objects/containers.md#meta) for
+every service program it contains. 
 
+The interface type `Service_Program_Metadata` is declared in the package `AdaOS.Services`, and
+is derived from `AdaOS.Program.Program_Metadata`.
 
+This type declares several [properties](../intro/intro.md#prop): 
 
+ * [Object identifier](../objects/objects.md#oid) `OID` (inherited from `Member_Metadata` via `Program_Metadata`); 
 
-.....
+ * `External_Tag` (inherited from `Member_Metadata` via `Program_Metadata`); 
 
+ * service program mode
+
+ * .....
+
+Actual types derived from `Service_Program_Metadata` may, of course, add further properties and
+methods. 
+
+For example, if the shepherd is a directory (most will be), the metadata will
+also have the property `Name`. 
 
 
 
@@ -101,20 +159,15 @@ particular mode and its implementor actually being created or destroyed.
 
 
 -----------------------------------------------------------------------------------------------
-## .....
+## Service Program Modes {#mode}
 
-.....
+For each of its member service programs, a [shepherd](#shep) maintains a _service program
+mode_. 
 
+A member service program can be in one of five modes at any one time. 
 
-
-
------------------------------------------------------------------------------------------------
-## Service Modes {#mode}
-
-Every service program is in one of five _service modes_ at any one time.
-
-The package `AdaOS.Services` contains a declaration of the enumerated type `Service_Mode`  
-whose five values are as follows:
+The package `AdaOS.Services` contains a declaration of the enumerated type
+`Service_Program_Mode` whose five values are as follows: 
 
 | Mode         | Description                                                  |
 | ------------ | ------------------------------------------------------------ |
@@ -127,37 +180,47 @@ whose five values are as follows:
 The mode is said to be _good_ if it is `Dormant`, `Stopped`, `Starting`, or `Running`, and
 _bad_ if it is `Retired`. 
 
-These modes are very similar to the [execution modes](../adaos/compart.md#mode) of a
-compartment (an execution of a program), but they are different, in that they are describing a
-service program, rather than a compartment. They don't replace the execution modes of a
-compartment. 
+These modes have a similarity similar to the [execution modes](../adaos/compart.md#mode) of a
+compartment as well as the [basic state](../objects/objects.md#state) of objects, but they are
+not quite the same.  
+
+```ada
+function Mode (Program: not null access Service_Program)
+return
+   Service_Program_Mode is abstract;
+```
+
+The function `Mode` returns the current service program mode of a service program. 
 
 
-### Dormant
+### Dormant {#dormant}
 
-A service program is in the _dormant_ mode when no implementor (a compartment corresponding to
-an execution of the program) exists.
+A service program is _dormant_ when no [implementor](#imp) exists, but the program is not
+[retired](#retired). 
 
-When a service program is [dormant](#dorm), .....
+When a service program is dormant, if any of its controlled services is
+[found](../objects/containers.md#find), the shepherd runs the service
+program, by calling [`Start`](#start), and waits for the service's
+[placeholder](../objects/containers.md#ph) to be replaced by a link to the service. Then, the
+finding of the service can complete successfully. 
 
-.....
+There may be a little bit of time in between the service program being in a particular mode and
+its implementor actually being created or destroyed. 
 
+The term 'dormant' is deliberately chosen to coincide with the concept of the dormancy of an
+[object](../objects/objects.md#state). Whilst the dormancy of an object is not exactly the same
+as the dormancy of a service program, the concepts are very similar. 
 
-
-
-
-
-When a service program is initially in the dormant mode. 
-
-.....
+When a service program is added to a shepherd, it is initially in the dormant mode. 
 
 
 ### Stopped
 
-In the _stopped_ mode, the program's controlled services are (nominally) not doing anything and
-should not be called upon to do anything. 
+If a service program is _stopped_, its controlled services are (nominally) not doing anything
+and should not be called upon to do anything. 
 
-Generally, any attempt to call upon a controlled service to do something when its service program is in this mode should 
+Generally, any attempt to call upon a controlled service to do something when its service 
+program is stopped should 
 wait, for a certain period of time, for the service to get into the running mode. If this 
 period of time expires without the service getting into the running mode, the attempt should 
 fail (if it was a call to a subprogram, that subprogram should propagate the exception 
@@ -165,18 +228,19 @@ fail (if it was a call to a subprogram, that subprogram should propagate the exc
 ?????`Mode_Error` of `AdaOS.Services`). 
 
 The service program may (temporarily) be in the process of stopping when it is in this mode.
-The program might, therefore, be doing things while in this mode (for example, finishing the
+The program might, therefore, be temporarily doing things while in the `Stopped` mode (for example, 
+it might be finishing the
 execution of things one of its services was called upon to do before it went into stopped
 mode), but it will not start doing anything while in stopped mode. 
 
 
 ### Starting
 
-In the _starting_ mode, a service program is (temporarily) getting itself into the running
-mode. Its services are still not yet ready to be called upon to do things. 
+If a service program is _starting_, it is temporarily getting itself into the `Running` mode.
+Its services are still not yet ready to be called upon to do things. 
 
 Generally, any attempt to call upon a controlled service to do something when it is in this
-mode should wait, for a certain period of time, for the service to get into the running mode.
+mode should wait, for a certain period of time, for the service to get into the `Running` mode.
 If this period of time expires without the service getting into the running mode, the attempt
 should fail (if it was a call to a subprogram, that subprogram should propagate the exception 
 
@@ -185,104 +249,281 @@ should fail (if it was a call to a subprogram, that subprogram should propagate 
 
 ### Running
 
-In _running_ mode, a service program may be doing things, and its controlled services are ready
-to be called upon to do things. 
+If a service program is _running_, it may be doing things, and its controlled services are
+ready to be called upon to do things. 
 
 
 ### Retired
 
-A service program is typically put into the _retired_ mode when it has failed too many times.
-In this mode, the program is (nominally) not doing anything and its controlled services should
-not be called upon to do anything. In this mode, the program should not be allowed to be
-started. 
+A service program is typically _retired_ when it has failed too many times. In this mode, the
+program is (nominally) not doing anything and its controlled services should not be called upon
+to do anything. In this mode, the program should not be allowed to be started. 
+
+When a service program is retired, it should terminate itself or shut itself down, so that
+there will, after a time, be no implementor. However, the program is termed retired rather than
+dormant. 
 
 Generally, if a service program is put into retired mode, it stays in that mode. A program
 controller may provide a means to get programs out of retired mode, but that depends on the
 service controller. 
 
 Any attempt to call upon a controlled service to do something when its service program is in
-this mode should immediately fail (if it was a call to a subprogram, that subprogram should
+this mode should immediately fail (if it were a call to a subprogram, that subprogram should
 propagate the exception 
 
 ?????`Mode_Error` of `AdaOS.Services`).
 
-When a service program is in retired mode, it is normally put into the same state as if it were
-dormant  .....
+
+
+-----------------------------------------------------------------------------------------------
+## Service Program Start-up Strategies {#strat}
+
+A [shepherd](#shep) is configured with all the service programs it is to control. 
+
+Against each service program, a _start-up strategy_ is also configured, as well as possibly a
+_start-up phase_. 
+
+For any one service program, the start-up strategy can be one of the following: 
+
+ * `Standby`
+ 
+ * `On_Demand`
+ 
+ * `Auto` 
+    
+When all the service programs the shepherd controls are either [dormant](#dormant) or
+[retired](#retired), then the shepherd initiates [system shutdown](#shutdown). 
+
+The _start-up phase_ of a member service program, if specified, must be an integer made up
+solely of decimal digits `0` to `9`, whose value is between 1 and 99 (inclusive). It is only
+relevant to the `Auto` strategy. If omitted, the default is 99. A phase is considered _earlier_
+than phases which have a numerically higher value. 
+
+
+### Standby {#standby}
+
+If the start-up strategy of a service program is `Standby`, the program is not run unless
+requested by calling its [`Start`](#start) method. 
+
+.......
+
+See [Example of Running a Program](../adaos/programs.md#ex1) for more details on how a program is started .....
+
+........
+
+This is the default start-up strategy of a program if a start-up strategy is not specified.
+
+
+
+..........
+
+
+### On Demand {#ondem}
+
+If the start-up strategy of a service program is `On_Demand`, the program is started whenever
+one of the services it controls is [found](../objects/containers.md#find) and the program is
+[dormant](#dorm). 
+
+The program is started by calling its [`Start`](#start) method. 
+
+.........
+
+
+### Auto {#auto}
+
+If the start-up strategy of a program is `Auto`, the shepherd will start the program 
+(once), as soon 
+as the shepherd has completed its own initialisation 
+and after all service programs of an earlier phase have started
+ 
+ 
+
+?????and are awaiting a [signal](?????). 
+
+
+. 
+
+The program is started by calling its [`Start`](#start) method. 
+
+If the program completes, it becomes dormant again. 
+
+The `Auto` service programs of a particular phase are all run in parallel. 
+
+........
+
+
 
 
 
 -----------------------------------------------------------------------------------------------
-## Service Control
+## Automatic Service Program Restart {#restart}
 
-Every service program must implement the additional primitive operations, the _service program 
-control operations_, of the interface type `Service_Program`, ..... 
+If a service program, under the control of a particular [shepherd](#shep), fails, meaning that
+it completes with an [exit code](../adaos/compart.md#exco) other than 0 (for success), the
+shepherd can be expected to automatically attempt to restart the service program. 
 
-.....
+This is termed _automatic restart_. 
 
-Normally, the service program control operations are only called upon (directly) by the [service 
-controller](tethys.md). All software (other than the program controller) should use the service 
-control operations of the program controller to start and stop services. 
+However, it can be expected that the shepherd will impose restrictions on automatic restart. 
 
-A service program is restarted by calling `Stop` and then `Start`. This sequence should cause the 
-program to go through the complete cycle of disposing of its resources and then initialising 
-them again, as if it were being started for the first time. No service program should ever cut this 
-cycle short in any way. 
-
-
-### Start
-
-The `Start` procedure transitions the service program from the dormant or stopped mode to the
-starting mode. 
+If, within a certain time period of configurable length (default 10 minutes), a service program
+fails more than a certain configurable threshold number of times (default 10), the shepherd can
+be expected to [retire](#retire) the service program. 
 
 ......
 
-If the program is already in the starting or running mode, calling `Start` (harmlessly) does 
-nothing. 
-
-If the program is in the retired mode, calling `Start` fails, with the exception `Mode_Error` 
-(of `AdaOS.Services`) being propagated. 
 
 
-
-
-
-When in the dormant mode, the service program should create a new
-[compartment](../adaos/programs.md#exec), which becomes the [implementor](#dorm) of the service
-program. Once the compartment has been started, it should go into Starting mode, in which it
-will perform all of its normal initialisation. When the initialisation is complete, the program
-should transition into the Running mode. 
+-----------------------------------------------------------------------------------------------
+## {#}
 
 
 
 
 
-
-When in stopped mode, the program should go into starting mode. To do this, the program will
-perform all of its normal initialisation. When the initialisation is complete, the program
-should transition into the running mode. 
-
-Starting a service will not normally happen frequently, and is not speed critical. However, the
-start-up process should, generally, aim to get the program into a state where it is able to
-respond quickly and perform its duties efficiently. The program will be in running mode when it
-is in this state. 
-
-If the program is in the middle of stopping when `Start` is called, the program should complete
-its stopping procedures normally and then go into starting mode as normal. It is unlikely to be
-advisable to try to optimise this situation, but if there is any such optimisation there must
-be no danger of the program being destabilised by it. 
+-----------------------------------------------------------------------------------------------
+## {#}
 
 
-### Stop
 
-The `Stop` procedure immediately transitions the service program from starting or running mode
-to the stopped mode.
+
+
+-----------------------------------------------------------------------------------------------
+## Shepherd Configuration Modules {#shepcm}
+
+
+
+
+????? Or just have a saved state file?
+
+
+
+
+..... _program controller configuration module_ .....
+
+
+
+
+
+
+The program controller configuration module class is named: 
+
+    progcont.config
+    
+This module contains exports named: 
+
+    progcont.programs
+    progcont.services
+    
+......
+
+This data provides configuration information for an executable image's program controller (e.g. 
+Tethys). 
+
+They could be imported like this: 
+
+```ada
+   Programs: array (Positive range <>) of constant ......
+   with
+      Import,
+      External_Name => "progcont.programs";
+
+   Services: array (Positive range <>) of constant ......
+   with
+      Import,
+      External_Name => "progcont.services";
+```
 
 .....
 
-If the program is already in stopped mode, calling `Stop` does nothing. 
 
-If the program is in retired mode, calling `Stop` does nothing (in particular, it does not
-change the mode of the program).
+
+
+
+
+
+
+
+
+
+
+-----------------------------------------------------------------------------------------------
+## Service Program Control Operations
+
+Every service program must implement the additional primitive operations of the interface type
+`Service_Program`, called the _service program control operations_. 
+
+..... 
+
+The service program control operations are listed in the following table. 
+
+| Operation | Transitions SP into mode    |
+| --------- | --------------------------- |
+| `Start`   | starting (and then running) |
+| `Stop`    | stopped                     |
+| `Retire`  | retired                     |
+| `Sleep`   | dormant                     |
+
+.....
+
+Normally, a service program's control operations are only called upon (directly) by the
+program's [shepherd](#shep). All software other than the shepherd should leave service program
+control to be done automatically by the shepherd. 
+
+A service program is restarted by calling `Stop` and then `Start`. This sequence should cause
+the program to go through the complete cycle of disposing of its resources and then
+initialising them again, as if it were being started for the first time. No service program
+should cut this cycle short in any way; if it does, it must be guaranteed to have the same
+effect as the full cycle. 
+
+
+### Start {#start}
+
+```ada
+procedure Start (Program: not null access Service_Program);
+```
+
+The procedure `Start` transitions a service program from dormant or stopped to starting. 
+
+If the program is already starting or running, calling `Start` (harmlessly) does nothing. 
+
+If the program is retired, calling `Start` fails, with the exception `Mode_Error` (of
+`AdaOS.Services`) being propagated. 
+
+When dormant, the service program should create a new [compartment](../adaos/programs.md#exec),
+which becomes the [implementor](#imp) of the service program. Once the compartment has been
+started, it should go into `Starting` mode (a compartment mode, not a service program mode), in
+which it will perform all of its normal initialisation. When the initialisation is complete,
+both the compartment and the service program should transition into `Running` mode. 
+
+When stopped, the program should go into starting mode. To do this, the program will perform
+all of its normal initialisation. When the initialisation is complete, the program should
+transition into the running mode. 
+
+Starting a service program will not normally happen frequently, and is not speed critical.
+However, the start-up process should, generally, aim to get the program into a state where it
+is able to respond quickly and perform its duties efficiently. The program will be in running
+mode when it is in this state. 
+
+If the service program is in the middle of stopping when `Start` is called, the program should
+complete its stopping procedures normally and then go into starting mode as normal. It is
+unlikely to be advisable to try to optimise this situation, but if there is any such
+optimisation there must be no danger of the program being destabilised by it. 
+
+
+### Stop {#stop}
+
+```ada
+procedure Stop (Program: not null access Service_Program);
+```
+
+The procedure `Stop` immediately transitions the service program from starting or running to
+the stopped mode. 
+
+If the program is already in stopped mode, calling `Stop` (harmlessly) does nothing. 
+
+If the program retired, calling `Stop` does nothing (in particular, it does not change the mode
+of the program and it does not propagate any exception). 
 
 If the program is in starting mode when `Stop` is called, it should immediately go into stopped
 mode and never go into running mode in between. 
@@ -295,28 +536,42 @@ critical.
 ......
 
 
-### Retire
+### Retire {#retire}
 
-The `Retire` procedure immediately transitions the service program from any other mode into
+```ada
+procedure Retire (Program: not null access Service_Program);
+```
+
+The procedure `Retire` immediately transitions the service program from any other mode into
 retired mode. 
 
 .....
 
-If the program is already in retired mode, calling `Retire` does nothing. 
+If the program is already retired, calling `Retire` (harmlessly) does nothing. 
 
 If the program is in starting mode when `Retire` is called, it should immediately go into
 retired mode and never go into running mode. 
 
-When going into retired mode from either starting or running mode, the program should reduce
-its resource usage to a bare minimum. 
+When going into retired mode from either starting or running mode, the program's compartment
+should be deleted (so that there is no longer any implementor). 
 
 .....
 
+If a service program is retired, it remains retired permanently. It can be unretired (returned
+to normal, dormant mode) by deleting it from the shepherd and then adding it to the shepherd
+again. 
 
-### Sleep
 
-The `Sleep` procedure transitions the service program from any other mode except retired into
+### Sleep {#sleep}
+
+```ada
+procedure Sleep (Program: not null access Service_Program);
+```
+
+The procedure `Sleep` transitions the service program from any other mode, except retired, into
 dormant mode. 
+
+.....
 
 
 
@@ -329,7 +584,7 @@ dormant mode.
 
 
 -----------------------------------------------------------------------------------------------
-## Service Program Shutdown (#shutdown)
+## Service Program Shutdown (#shut)
 
 .....
 
@@ -353,14 +608,6 @@ respond to the .....
 
 -----------------------------------------------------------------------------------------------
 ## 
-
-
-
-
-
-
------------------------------------------------------------------------------------------------
-## Program Startup mode 
 
 
 
@@ -410,21 +657,32 @@ as it has completed its own initialisation (after system startup), will run the 
 
 
 
------------------------------------------------------------------------------------------------
-## Shims
 
-The services of the host operating system, if there is one, can be made available to ECLAT 
-programs by creating _shims_.
 
-A shim is a service that acts as intermediary for one or more services, daemons, or other 
-functions of the host operating system. 
 
-.....
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
 -----------------------------------------------------------------------------------------------
 ## Stock Services {#stock}
+
+
+????? More succinct, and into Services.md
+
+
 
 ECLAT is supplied with a number of _stock services_ that play an essential role in enabling 
 programs to execute. In general, programs will assume that these services are available. 
@@ -439,7 +697,7 @@ The name of this service is:
     adaos.services.tethys
     
 Tethys does not have any associated service program. It is all included in a single [program 
-assembly](../rts/assemblies.md) module, named: 
+partition](../rts/partitions.md) module, named: 
 
     adaos.init.tethys
 
@@ -462,8 +720,8 @@ A general resource can be any kind of object, but often they are [files](../rts/
 
 ### Event Forwarding
 
-The [Event Broker](events.md) service enables assemblies to be sent events raised by 
-other assemblies. 
+The [Event Broker](events.md) service enables partitions to be sent events raised by 
+other partitions. 
 
 This service is based on the ECLAT [Event](../events/events.md) infrastructure. 
 
@@ -519,7 +777,7 @@ The associated service program is named `adaos.programs.kronos`.
 ### Distributed Transaction Management
 
 The [Distributed Transaction Management](transactions.md) service provides transaction objects 
-that can coordinate the activities of multiple assemblies under the control of a 
+that can coordinate the activities of multiple partitions under the control of a 
 single transaction. 
 
 .....
@@ -568,837 +826,7 @@ single transaction.
 
 
 
------------------------------------------------------------------------------------------------
-## Example: Implementing a Service Program
 
-For this example, we are going to implement a weather prediction service. The client provides 
-a time and a place, and the service predicts what the weather will be. 
-
-
-
-......
-
-
-
-.....
-
-```ada
-with Ada.Calendar;
-use  Ada.Calendar;
-
-package Weather_Prediction
-is
-   type Weather_Predictor is limited AdaOS.Services.Controlled_Service with private;
-   
-   type Predictor_Access is access all Weather_Predictor'Class;
-   
-   type Weather_Location 
-   with
-      Export, External_Name => "acme.ssc.weather.location"
-   is 
-      (Nuuk_GL, London_UK, Austin_TX);
-   
-   type Weather_Forecast is (Hot, Cold, Cloudy);
-   
-   procedure Make_Forecast (Predictor: in out Weather_Predictor;
-                            Location:  in     Weather_Location;
-                            Date:      in     Time;
-                            Forecast:  out    Weather_Forecast) is abstract;
-   
-   -- other public operations of Weather_Predictor
-
-private
-   type Weather_Predictor is limited AdaOS.Services.Controlled_Service with null record;
-
-end;
-```
-
-..... `Weather_Predictor` is derived from the type `Controlled_Service`  ......
-
-
-..... `acme.ssc.weather.location`, which stands for: a company named Acme, Software Standards
-Council, Weather Prediction Service. The values of this enumeration type will also be exported,
-as `acme.ssc.weather.location.nuuk_gl`, `acme.ssc.weather.location.london_uk`, and so forth. 
-
-We must also create a [module class definition](../pxcr/mcd.md) file for the module to be generated, .....
-
-
-The good news is that, because our module class derives from ......, we don't have to tediously
-repeat all of the ......, since they will all be inherited.
-
-.....
-
-```xml
-
-
-
-
-
-
-
-```
-
-
-.....
-
-
-```ada
-with Ada.Calendar;
-use  Ada.Calendar;
-
-package UCSD_Weather
-is
-   Service_Name: constant String := "acme.fgs.weather";
-   
-end;
-```
-
-
-
-
-
-
-
-.....
-
-```ada
-package body UCSD_Weather
-is
-   task type Predictor_Service
-   is
-      new Weather_Prediction.Weather_Predictor
-   with
-      overriding 
-      entry Make_Forecast (Location:  in  Weather_Location;
-                           Date:      in  Time;
-                           Forecast:  out Weather_Forecast);
-
-      -- other operations of Weather_Predictor
-
-      overriding entry Engage_Operation;
-      overriding entry Disengage_Operation;
-      overriding entry Shut_Down_Service_2;
-      overriding entry Shut_Down_Service_3;
-   end;
-
-   task body Predictor_Service is separate;
-
-   The_Service: aliased UCSD_Predictor; -- singleton object
-   
-   procedure Engage_Predictor (Predictor: out Predictor_Access)
-   is
-   begin
-      AdaOS.Services.Engage_Service (Service_Name, Predictor);
-   end;
-
-begin
-   AdaOS.Services.Register_Service (Service_Name, The_Service'Access);
-
-end UCSD_Weather;
-```
-
-.....
-
-
-
-
-Now we will define the [endorsements](../security/endorse.md) intermediary package 
-for the service. 
-
-The following [endorsement information document](#eid) .....
-
-
-```xml
-<?xml version="1.0"?>
-<security xmlns="?????">
-   <import name="ada.calendar"/>
-   <import name="acme.ssc.weather"/>
-   <service-control name="acme.fgs.weather.control">
-      <operation name="make-forecast">
-         <endorse>
-            <input>
-               <attribute name="location" type="acme.ssc.weather.location"/>
-               <attribute name="date" type="ada.calendar.time"/>
-            </input>
-         </endorse>
-      </operation>
-   </service>
-</security>
-```
-
-
-config
-
-
-
-This EID will be built into a module ......
-
-.....
-
-Now we write a service control package that imports the core type created by the EID, and its 
-control operations. 
-
-```ada
-with AdaOS.Services.Helpers;
-with Weather_Prediction;
-
-use AdaOS.Services.Helpers;
-use Weather_Prediction;
-
-package UCSD_Weather_Service_Control
-is
-   type Service_Control_Core is new Controller_Service_Core with private;
-   
-   procedure Begin_Make_Forecast (Core:      in out Service_Control_Core;
-                                  Location:  in     Weather_Location;
-                                  Date:      in     Time);
-
-private
-   type Service_Control_Core 
-   with
-      Import, External_Name => "acme.fgs.weather.control.core";
-   
-end;
-```
-
-In this case, the only control operation is to endorse the 'make forecast' operation. 
-
-
-.....
-
-
-
-
-
-
-
-```ada
-package body UCSD_Weather_Service_Control
-is
-   procedure Begin_Make_Forecast (
-      Core:     in out Service_Control_Core with External_Name => "core";
-      Location: in     Weather_Location     with External_Name => "location";
-      Date:     in     Time                 with External_Name => "date")
-   with 
-      Import, External_Name => "acme.fgs.weather.control.make-forecast";
-
-end;
-```
-
-.....
-
-Now we can write the predictor service implementation.
-
-```ada
-with UCSD_Weather_Service_Control;
-
-use UCSD_Weather_Service_Control;
-
-separate (UCSD_Weather)
-
-task body Predictor_Service
-is
-   Core: Service_Control_Core;
-
-begin
-   -- initialisation actions
-
-   loop
-      select
-         accept Make_Forecast (Location:  in  Weather_Location;
-                               Date:      in  Time;
-                               Forecast:  out Weather_Forecast)
-         do
-            Begin_Make_Forecast (Core, Location, Date);
-            
-            if not Core.Operation_Permitted then
-               raise Permission_Error;
-            end if;
-
-            case Location -- (regardless of Date :-)
-            is
-               when Nuuk_GL   => Forecast := Cold;
-               when London_UK => Forecast := Cloudy;
-               when Austin_TX => Forecast := Hot;
-            end case;
-         end do;
-
-         if Core.Auditing_Required then
-            -- audit the operation
-         end if;
-
-         Core.End_Operation;
-
-      or
-         -- accept other operations
-
-      or
-         accept Engage;
-         Core.Engage_Service;
-
-      or
-         accept Disengage;
-         Core.Disengage_Service;
-
-      or
-         when not Core.Is_Engaged =>
-         accept Shutdown_2;
-         Core.Shut_Down_Service;
-
-      or
-         accept Shutdown_3;
-         Core.Shut_Down_Service;
-
-      or
-         when not Core.Is_Engaged =>
-         delay Core.Service_Timeout;
-         exit;
-      end select;
-   end loop;
-
-   -- shutdown actions
-
-end
-   Predictor_Service;
-```
-
-This is a task .......
-
-
-
-
-
-
-Finally, we can write the implementation of the service program.
-
-
-```ada
-with UCSD_Weather;
-
-procedure Start
-is
-begin
-   UCSD_Weather.
-
-end;
-
-
-```
-
-
-
-```ada
-with AdaOS.Services.Helpers;
-with Start, Stop;
-
-procedure Main
-   is new AdaOS.Services.Helpers.Service_Program (Start, Stop, .....);
-
-
-
-
-
-
-
-
-
-
-?????
-
-procedure Main
-is
-begin
-   AdaOS.Services.Await_Program_Termination;
-end;
-```
-
-
-
-
-
------------------------------------------------------------------------------------------------
-## Service Programs: Main Subprogram
-
-A service program should implement the service in a library-level non-generic package (it might 
-be an instantiation of a generic package). 
-
-The reason it should be done like this is for portability. To port your overall application
-cluster, group, or suite to an Ada implementation other than ECLAT, the facility to implement
-services as service programs (in particular, to link together multiple modules) may not exist,
-or it may not be a practical option. In this case, it will be necessary to bring the required
-services into the same library, to be compiled all together to make an executable program with
-services that are not implemented by separate programs. Having the service implemented by a
-library-level package will help to facilitate this kind of manipulation. 
-
-The main subprogram should normally look like this: 
-
-```ada
-with AdaOS.Execution;
-procedure Main
-is
-begin
-   -- Put here anything that needs to be done before starting up the service
-   AdaOS.Services.Await_Program_Termination;
-   -- Put here anything that needs to be done after the service has shut down
-end;
-```
-
-The procedure `Await_Program_Termination`, declared in the package `AdaOS.Services`, 
-
-
-
-......
-
-
-
------------------------------------------------------------------------------------------------
-##
-
-
-
-
------------------------------------------------------------------------------------------------
-##
-
-
-
-
------------------------------------------------------------------------------------------------
-##
-
-
-
-
------------------------------------------------------------------------------------------------
-## Configuring Service Programs
-
-........
-
-A service can be added to those associated with a service program in the [base program 
-repertoire](#brp) of an executable image with the following 
-
-
-????? XML STUF?
-
-
-Realizor AdaShell command: 
-
-```sh
-chimg X
-chprog Z 
-progserv S
-```
-   
-where `X` is the executable image, `Z` is the name of the program, and `S` is the name of the 
-service. 
-
-.....
-
-
-
-
-
-
-
-.....
-
-
-
------------------------------------------------------------------------------------------------
-##
-
-
-
-
------------------------------------------------------------------------------------------------
-##
-
-
-
-
------------------------------------------------------------------------------------------------
-##
-
-
-
-
------------------------------------------------------------------------------------------------
-## Example
-
-.....
-
-Supposing we have a service `Forestry.Tree_Counter`, implemented by a program named 
-`forestry.tree-counter`, and we wish to register it as a service program with Tethys under the 
-same name. 
-
-The supposed purpose of this service is to count up trees. (Perhaps a drone flies over a forest 
-and counts trees as it sees them.)
-
-It will have three essential operations: reset the counter (to zero); add a certain number (of 
-trees) to the current count; retrieve the current count. 
-
-In addition, we will need to implement the `Startup` and `Shutdown` operations. 
-
-.....
-
-
-### Service Definition Library
-
-First, we create an abstract type to represent any and all tree-counting services, and a 
-library, the _service definition library_ of the tree counting service, to hold just this type. 
-
-The package specification might look like this:
-
-```ada
-package Acme.Forestry
-with
-   Preelaborable_Initialization
-is
-   type Tree_Counter is interface and AdaOS.Services.Controlled.Controlled_Service;
-
-   procedure Reset (Counter: access Tree_Counter) is abstract;
-   
-   procedure Add (Counter: access Tree_Counter;
-                  Number:  in Natural := 1) is abstract;
-   
-   procedure Get_Count (Counter: access Tree_Counter;
-                        Count: out return Natural) is abstract;
-   
-   procedure Start_Up (Counter: access Tree_Counter) is abstract;
-   procedure Shutdown (Counter: access Tree_Counter) is abstract;
-end;
-```
-
-
-### Compiling the SDL
-
-We will say the common library is named:
-
-    acme.forestry
-
-.......
-
-We will assume that the current directory is:
-
-    C:\eclat\src\acme.forestry
-    
-which is where the Ada source text files are. 
-
-We will assume our environment variables have the following values:
-
-```
-PATH=?????
-ECLAT_SVC=?????
-PXCR_SVC=?????
-ECLAT_CWL=acme.footle.bartle
-
-```
-
-The following [Allegra](?????) 
-or `bash` shell commands could be used to configure and
-compile the service definition library: 
-
-```
-export ECLAT_CWL=acme.forestry # change to the correct CWL
-eclat compile # creates library acme.forestry and compiles it
-eclat version 1.0.0.0 # sets the library's version
-eclat wrap # now creates a wrapped version of the library
-```
-
-The equivalent in the `CMD` shell would be:
-
-```
-set ECLAT_CWL=acme.forestry
-eclat compile
-eclat version 1.0.0.0
-eclat wrap
-```
-
-### Service package specification
-
-Now we must create a library to contain an implementation of the tree counter service. 
-
-We're going to call it: 
-
-    acme.pioneer
-    
-The following Allegra or `bash` shell commands could be used to create the library and set the
-service definition library as one of its dependencies: 
-
-```
-export ECLAT_CWL=acme.pioneer # change to the correct CWL
-eclat dep acme.forestry
-```
-
-The package specification might look like this:
-
-```ada
-with Acme.Forestry;
-
-package Acme.Pioneer
-is
-   type Tree_Counter is new Acme.Forestry.Tree_Counter with private;
-
-   procedure Reset (Counter: access Tree_Counter);
-   
-   procedure Add (Counter: access Tree_Counter;
-                  Number:  in Natural := 1);
-   
-   procedure Get_Count (Counter: access Tree_Counter;
-                        Count: out return Natural);
-   
-   procedure Startup (Counter: access Tree_Counter);
-   procedure Shutdown (Counter: access Tree_Counter);
-
-private
-   task type Tree_Counter
-   is
-      new AdaOS.Services.Controlled.Controlled_Service 
-   with
-      overriding entry Reset;
-      overriding entry Add (Number:  in Natural := 1);
-      overriding entry Get_Count (Count: out return Natural);
-      overriding entry Start_Up;
-      overriding entry Shutdown;
-   end; 
-
-end;
-```
-
-..........
-
-
-### Service Package Body
-
-.....
-
-```ada
-package body Acme.Pioneer
-is
-   task body Tree_Counter
-   is
-      Is_Ready: Boolean := False;
-      The_Count: Natural := 0;
-   begin      
-      loop
-         select
-            accept Reset;
-            if not Ready then raise Program_Error; end if;
-            The_Count := 0;
-         or
-            accept Add (Number: in Natural := 1)
-            do
-               if not Ready then raise Program_Error; end if;
-               The_Count := @ + Number;
-            end;
-         or
-            accept Get_Count (Count: out return Natural)
-            do
-               if not Ready then raise Program_Error; end if;
-               Count := The_Count;
-            end;
-         or
-            accept Start_Up;
-            if Ready then raise Program_Error; end if;
-            Ready := True;
-         or
-            accept Shutdown;
-            if not Ready then raise Program_Error; end if;
-            Ready := False;
-         or
-            terminate;
-         end select;
-      end loop;
-   end; 
-   
-   The_Counter: aliased constant Tree_Counter;
-
-begin
-   AdaOS.Services.Default_Services.Insert ("acme.forestry.tree-counter", The_Counter'Access);
-
-end Acme.Pioneer;
-```
-
-..............
-
-Note that we named the service:
-
-    acme.forestry.tree-counter
-    
-There is no reference to 'Pioneer'. This is because (the authors of) programs wishing to use 
-the service are (assumed to be) not interested in the implementation of the service, but 
-instead only on what the service interface is, and what its operations promise to do. 
-
-..............
-
-
-### Main Subprogram
-
-We would have the usual main subprogram for a service program: 
-
-```ada
-with AdaOS.Execution;
-with Acme.Pioneer;
-
-procedure Main
-is
-begin
-   AdaOS.Services.Await_Program_Termination;
-end;
-```
-
-.....
-
-It is vital that we create a need (in the technical sense) of the package `Acme.Pioneer`, 
-even though we do not apparently use it at all. This is to force the package to be included 
-in the build, and to ensure that it is initialised. 
-
-
-### Building the Service Program
-
-The following `bash` shell commands could be used to configure, compile, and build this service 
-program: 
-
-```
-eclat build
-```
-
-This command creates a build, a module, an assembly, and a program, all named `acme.pioneer`. 
-
-.........
-
-
-### Test Program
-
-...... a program that will engage the tree counter service and use it to count up some trees. 
-
-......
-
-```ada
-with Ada.Command_Line;
-with Ada.Text_IO, Ada.Integer_Text_IO;
-with AdaOS.Services.Controlled;
-with Acme.Forestry;
-
-use Ada.Text_IO, Ada.Integer_Text_IO;
-
-procedure Main
-is
-   Counter: 
-      aliased constant Acme.Forestry.Tree_Counter := 
-         AdaOS.Services.Controlled.Services ("acme.forestry.tree-counter");
-   Trees: Natural;
-   Total: Natural;
-begin
-   Put_Line ("Starting tree counter test");
-   Counter.Reset;
-   for Arg in 1 .. Ada.Command_Line.Argument_Count
-   loop
-      Trees := Natural'Value (Arg);
-      Put ("Adding: ");
-      Put (Trees);
-      Put (" trees");
-      New_Line;
-      Counter.Add (Trees);   
-   end loop;
-   Counter.Get_Count (Trees);
-   Put ("Total: ");
-   Put (Total);
-   Put (" trees");
-   New_Line;
-   Counter.Reset;
-end;
-```
-
-............
-
-```
-export ECLAT_CWL=acme.forestry-test
-eclat dep acme.forestry
-eclat build
-```
-
-...........
-
-
-## Realising the Test
-
-The following `bash` shell or `CMD` shell commands can be used to realise an executable which 
-will contain the service program and the program to test it: 
-
-```
-pxcr image tc-test program acme.forestry-test startup main
-pxcr image tc-test service acme.forestry.tree-counter program acme.pioneer
-pxcr image tc-test make-exe
-```
-
-The resulting executable image (file) `tc-test` will be put into the ECLAT `bin` directory 
-(on the Windows platform, the file will be named `tc-test.exe`). 
-
-
-### Running the Test
-
-The following command should run the tree counter test program we have built and realised: 
-
-```
-tc-test 23 45 67
-```
-
-It should output the following: 
-
-```
-Starting tree counter test
-Adding: 23 trees
-Adding: 45 trees
-Adding: 67 trees
-Total: 135 trees
-```
-
-..............
-
-
-
------------------------------------------------------------------------------------------------
-##
-
-
-
-
------------------------------------------------------------------------------------------------
-##
-
-
-
-
-
------------------------------------------------------------------------------------------------
-## 
-
-
-
-
-
-
------------------------------------------------------------------------------------------------
-## 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
------------------------------------------------------------------------------------------------
-##
 
 
 

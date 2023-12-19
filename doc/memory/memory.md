@@ -115,14 +115,15 @@ the library it is compiled into.
 
 ..... storage management policy can be one of:
 
- * no reclamation or rearrangement (`None`)
+ * no reclamation or defragmentation (`None`)
 
- * reclamation, but no rearrangement (`Reclaim`)
+ * reclamation, but no defragmentation (`Reclaim`)
 
- * reclamation and rearrangement (`Rearrange`)
+ * reclamation and defragmentation (`Full`)
 
-If there is no pragma `Storage_Management`, the default setting of reclamation and 
-rearrangement applies. 
+If there is no pragma `Storage_Management`, the default setting of reclamation and
+defragmentation applies. 
+
 
 
 -----------------------------------------------------------------------------------------------

@@ -1,7 +1,7 @@
 -----------------------------------------------------------------------------------------------
 # Future
 
-Hopefully, at some point, I’ll be able to implement .....
+Hopefully, at some point, Iï¿½ll be able to implement .....
 
 
 
@@ -47,7 +47,7 @@ __Ithaca__ is an object database system for Ada.
 Ithaca is based on the concept of the 'persistent object', which is an Ada object that is 
 referenced by an object of a custom access type (named `Persistent_Access`). 
 
-Persistent objects must be of a type that can be serialised (using the attributes `Output` and 
+Persistent objects must be of a type that can be serialised (using the properties `Output` and 
 `Input`), and this is how the objects are written into the database and read out of it. 
 
 Caching of objects in memory, and flushing of new and dirty objects back into the database, is 
@@ -87,8 +87,8 @@ interact with the database.
 Usually a service is programmed in Ada and has an associated database. Outside software 
 accesses the database exclusively through calls into the service. 
 
-Tables can be stored in multiple actual tables (called 'assemblies'). A variety of formats of 
-assembly can be chosen. Indexes are implemented as (extra) assemblies. 
+Tables can be stored in multiple actual tables (called 'partitions'). A variety of formats of 
+partition can be chosen. Indexes are implemented as (extra) partitions. 
 
 There will be functionality to easily archive (move) or back up (copy) data in a Daedalus 
 database, and of course to read it back in again. 
@@ -287,34 +287,6 @@ ALDUS will deal with licensing .....
 
 
 -----------------------------------------------------------------------------------------------
-## Kantan
-
-Kantan will be a package manager system. A package is an archive file (in the ZIP format, 
-probably) that contains all the files needed to introduce a specific piece of functionality to 
-a computer in a controlled manner. Associated with every package is meta-data (probably in the 
-form of an XML file), that gives details of the package (its name, version, description, 
-licence, etc). 
-
-A plugin for ECLAT will extend the build process to wrap up the output from a build into a 
-Kantan package and generate the meta-data (file). 
-
-A Choreographer (q.v.) plugin will enable a package, after it has passed testing, to be added 
-to a catalog of packages. 
-
-A GUI will allow the user to: 
-
- * browse a catalog and select packages to be installed; 
- 
- * browse a list of already installed packages, view available updates and upgrades for each, 
-   select packages to be uninstalled, updated, or upgraded; carry out the selecte operations. 
-
-A command-line tool will provide the same functionality. 
-
-
-
-
-
------------------------------------------------------------------------------------------------
 ## 
 
 
@@ -342,7 +314,7 @@ __Nyota__ will be an ECLAT plugin that adds various bits of functionality:
 
  * Easy XML, JSON, and YAML serialisation of Ada types just by adding an aspect. 
  
- * All the infrastructure needed to support remote services (and remote assemblies). 
+ * All the infrastructure needed to support remote services (and remote partitions). 
  
  * Easy exposure of a service as a SOAP-based or RESTful web API, again by adding a few 
    aspects and a bit of configuration.
@@ -381,40 +353,6 @@ Nyota will _wrap_ every remote procedure call .....
 
 -----------------------------------------------------------------------------------------------
 ## 
-
-
-
-
-
------------------------------------------------------------------------------------------------
-## Choreographer
-
-__Choreographer__ will be a build and deployment management system ......
-
-There will be plugins that provide a variety of extra functionality:
-
- * building using a specific toolset (e.g. ECLAT); 
-
- * provisioning of virtual servers on demand; 
- 
- * running a set of automated integration (or sanity) tests after deployment; 
- 
- * ensuring that the necessary compartment exists on target computers, and 
-   automatically fetching and installing necessary components etc.; 
-   
- * .....
-
-
-
-
-There will be a GUI for managing deployments and a command-line tool that provides the same 
-functionality. 
-
-The will be a service, the Choreographer Agent, which is installed on every computer that is to 
-have software deployed onto it, .....
-
-
-
 
 
 

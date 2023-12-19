@@ -40,7 +40,7 @@ The following environment variables need to be set:
 | `ALDUS_CWS`        | Name of the Current Working Sanctuary                     |
 | `?????_SVC`        | Full path of ????? Service saved state file               |
 | `?????_SVC`        | Full path of ????? Service saved state file               |
-| `BASEAUTH`         | Base authority, as a decimal integer                      |
+| `DEFAUTH`         | Default authority, as a decimal integer                      |
 
 ............
 
@@ -48,8 +48,8 @@ On hosted platforms, the `PATH` variable should include the ECLAT tools `bin` di
 that those tools can be executed (without having to give the full path to them every time). On 
 the AdaOS platform it is irrelevant. 
 
-On the AdaOS platform, the environment variable `BASEAUTH` needs to be set. It should be the 
-number of the base authority to be used, expressed as a decimal integer with no spaces or 
+On the AdaOS platform, the environment variable `DEFAUTH` needs to be set. It should be the 
+number of the default authority to be used, expressed as a decimal integer with no spaces or 
 punctuation. If this environment variable is not set, the value `0` is assumed by default, 
 which is the number of the top authority. Since, on hosted platforms, this is the authority 
 used throughout, it makes sense to simply not set this environment variable on hosted 
@@ -100,12 +100,12 @@ The following letters are used, in the update item paths, to mean the following:
 | U      | Library unit name                             |
 | S      | Programming language name                     |
 | B      | Build name                                    |
-| P      | Assembly name                                |
+| P      | Partition name                                |
 | C      | Module class name OR plugin class name        |
 | M      | Module name                                   |
 | N      | Module element (import or export) name        |
 | X      | Executable image name                         |
-| A      | Program assembly name                         |
+| A      | Program partition name                         |
 | Z      | Program name                                  |
 | E      | Environment name                              |
 | V      | Environment variable name OR library version  |
@@ -145,7 +145,7 @@ Abbreviations:
  
  * FQN = fully qualified name 
  
-Build mode value must be one of: `assembly`; `plugin`; `module`. 
+Build mode value must be one of: `partition`; `plugin`; `module`. 
 
 Any 'list' is a string list separated by `|`
 
@@ -172,7 +172,7 @@ Any 'list' is a string list separated by `|`
 | `eclat/builds(B)/modules(M)/exports`          | Exports list for module `M` of build `B`               |
 | `eclat/builds(B)/modules(M)/plugin_classes`   | Plugin class list for plugin `M` of build `B`          |
 
-| `eclat/builds(B)/assemblies(P)/units`         | Libary units that must be included in assembly `P`    |
+| `eclat/builds(B)/partitions(P)/units`         | Libary units that must be included in partition `P`    |
 | `eclat/builds(B)/main_unit`                   | Main subprogram                                        |
 | `eclat/builds(B)/programs(Z)/`     |                                                        |
 | `eclat/`                                      |                                                        |
@@ -196,11 +196,11 @@ Any 'list' is a string list separated by `|`
 | `pxcr/images(X)/`                             |                                                        |
 
 | `rts/images(X)/sit/length`                    | Length of the System Instance Table of image `X`       |
-| `rts/images(X)/assemblies(A)/init_procs`      | List of export names of MIPs of assembly `A`           |
-| `rts/images(X)/assemblies(A)/main_proc`       | Export name of main procedure of assembly `A`          |
-| `rts/images(X)/initial_assembly/name`         | Name of the initial assembly of image `X`              |
-| `rts/images(X)/initial_assembly/args`         | Program arguments for the initial assembly             |
-| `rts/images(X)/initial_assembly/vars(V)`      | Environment variables for the initial assembly         |
+| `rts/images(X)/partitions(A)/init_procs`      | List of export names of MIPs of partition `A`           |
+| `rts/images(X)/partitions(A)/main_proc`       | Export name of main procedure of partition `A`          |
+| `rts/images(X)/initial_partition/name`         | Name of the initial partition of image `X`              |
+| `rts/images(X)/initial_partition/args`         | Program arguments for the initial partition             |
+| `rts/images(X)/initial_partition/vars(V)`      | Environment variables for the initial partition         |
 |                                               | 
 | `tethys/environments(E)/vars(V)`              | Value for environment variable named `V`               |
 | `tethys/environments(E)/vars_inherit`         | List of environment variables to be inherited          |
@@ -210,14 +210,14 @@ Any 'list' is a string list separated by `|`
 | `tethys/environments(E)/`                     | 
 | `tethys/environments(E)/`                     | 
 |                                               | 
-| `tethys/assemblies(A)/init`               | List of assemblies (assemblies) of program `P`         |
-| `tethys/programs(P)/assemblies`               | List of assemblies (assemblies) of program `P`         |
-| `tethys/programs(P)/main_assembly`            | Main assembly of program `P`                           |
+| `tethys/partitions(A)/init`               | List of partitions (partitions) of program `P`         |
+| `tethys/programs(P)/partitions`               | List of partitions (partitions) of program `P`         |
+| `tethys/programs(P)/main_partition`            | Main partition of program `P`                           |
 | `tethys/programs(P)/environment`              | Environment to use as basis for executing progam `P`   |
 
-| `assembly_helper/builds(B)/assemblies(A)/`     |                                                        |
-| `assembly_helper/builds(B)/assemblies(A)`     |                                                        |
-| `assembly_helper/builds(B)/assemblies(A)`     |                                                        |
+| `partition_helper/builds(B)/partitions(A)/`     |                                                        |
+| `partition_helper/builds(B)/partitions(A)`     |                                                        |
+| `partition_helper/builds(B)/partitions(A)`     |                                                        |
 | ``                                            |                                                        |
 | ``                                            |                                                        |
 | ``                                            |                                                        |
